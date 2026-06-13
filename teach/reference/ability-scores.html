@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: Ability Scores &amp; Modifiers</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #faf9f7;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+    .ref-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: #999;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    h1 { font-size: 1.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .subtitle { font-style: italic; color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 1.75rem 0; }
+    h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.6rem; margin-top: 1.5rem; }
+    p { margin-bottom: 0.8rem; }
+
+    .formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      background: #f0ede8;
+      border-left: 3px solid #8b0000;
+      padding: 0.5rem 1rem;
+      border-radius: 0 4px 4px 0;
+      margin: 0.9rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 0.9rem 0;
+    }
+    th {
+      text-align: left;
+      padding: 0.4rem 0.7rem;
+      border-bottom: 2px solid #1a1a1a;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    td {
+      padding: 0.3rem 0.7rem;
+      border-bottom: 1px solid #e8e8e3;
+    }
+    tr:last-child td { border-bottom: none; }
+    .center { text-align: center; }
+
+    .dc-table td:first-child { font-weight: 600; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      background: #eeece7;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    .abilities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin: 0.9rem 0;
+    }
+    .ability-card {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.88rem;
+    }
+    .ability-abbr {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #8b0000;
+      display: block;
+      margin-bottom: 0.1rem;
+    }
+    .ability-name { font-weight: 600; font-size: 0.85rem; display: block; }
+    .ability-use { color: #666; font-size: 0.8rem; font-style: italic; }
+
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.82rem;
+      color: #999;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
+    .footer a { color: #005580; }
+  </style>
+</head>
+<body>
+
+<div class="ref-meta">Reference &middot; D&amp;D 5e</div>
+<h1>Ability Scores &amp; Modifiers</h1>
+<p class="subtitle">The six scores that define every creature in 5e — and the modifier formula behind every check.</p>
+
+<hr>
+
+<h2>The Six Abilities</h2>
+<div class="abilities-grid">
+  <div class="ability-card">
+    <span class="ability-abbr">STR</span>
+    <span class="ability-name">Strength</span>
+    <span class="ability-use">Melee attacks, carrying, Athletics</span>
+  </div>
+  <div class="ability-card">
+    <span class="ability-abbr">DEX</span>
+    <span class="ability-name">Dexterity</span>
+    <span class="ability-use">Ranged attacks, AC, Stealth, Acrobatics</span>
+  </div>
+  <div class="ability-card">
+    <span class="ability-abbr">CON</span>
+    <span class="ability-name">Constitution</span>
+    <span class="ability-use">Hit points, concentration saves</span>
+  </div>
+  <div class="ability-card">
+    <span class="ability-abbr">INT</span>
+    <span class="ability-name">Intelligence</span>
+    <span class="ability-use">Knowledge, Investigation, Arcana</span>
+  </div>
+  <div class="ability-card">
+    <span class="ability-abbr">WIS</span>
+    <span class="ability-name">Wisdom</span>
+    <span class="ability-use">Perception, Insight, Survival</span>
+  </div>
+  <div class="ability-card">
+    <span class="ability-abbr">CHA</span>
+    <span class="ability-name">Charisma</span>
+    <span class="ability-use">Persuasion, Deception, Performance</span>
+  </div>
+</div>
+
+<hr>
+
+<h2>Score → Modifier</h2>
+<div class="formula">modifier = &lfloor;(score &minus; 10) / 2&rfloor;</div>
+<p>In Go: <code>int(math.Floor(float64(score-10) / 2))</code> — not plain integer division, which truncates toward zero.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Score</th><th class="center">Modifier</th>
+      <th>Score</th><th class="center">Modifier</th>
+      <th>Score</th><th class="center">Modifier</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="center">&minus;5</td><td>8&ndash;9</td><td class="center">&minus;1</td><td>16&ndash;17</td><td class="center">+3</td></tr>
+    <tr><td>2&ndash;3</td><td class="center">&minus;4</td><td>10&ndash;11</td><td class="center">+0</td><td>18&ndash;19</td><td class="center">+4</td></tr>
+    <tr><td>4&ndash;5</td><td class="center">&minus;3</td><td>12&ndash;13</td><td class="center">+1</td><td>20</td><td class="center">+5</td></tr>
+    <tr><td>6&ndash;7</td><td class="center">&minus;2</td><td>14&ndash;15</td><td class="center">+2</td><td>30*</td><td class="center">+10</td></tr>
+  </tbody>
+</table>
+<p style="font-size:0.82rem;color:#888">* Score 30 (+10) is the theoretical maximum, found only on gods and ancient dragons.</p>
+
+<hr>
+
+<h2>Ability Check Resolution</h2>
+<div class="formula">d20 + modifier (+ proficiency if applicable) &ge; DC &rarr; <strong>Success</strong></div>
+
+<h2>Standard Difficulty Classes</h2>
+<table class="dc-table">
+  <thead><tr><th>Task</th><th>DC</th></tr></thead>
+  <tbody>
+    <tr><td>Very Easy</td><td>5</td></tr>
+    <tr><td>Easy</td><td>10</td></tr>
+    <tr><td>Medium</td><td>15</td></tr>
+    <tr><td>Hard</td><td>20</td></tr>
+    <tr><td>Very Hard</td><td>25</td></tr>
+    <tr><td>Nearly Impossible</td><td>30</td></tr>
+  </tbody>
+</table>
+
+<h2>Proficiency Bonus</h2>
+<p>Added to checks when the character is proficient in the relevant skill or tool. Scales with character level:</p>
+<table>
+  <thead><tr><th>Level</th><th>Proficiency Bonus</th></tr></thead>
+  <tbody>
+    <tr><td>1&ndash;4</td><td>+2</td></tr>
+    <tr><td>5&ndash;8</td><td>+3</td></tr>
+    <tr><td>9&ndash;12</td><td>+4</td></tr>
+    <tr><td>13&ndash;16</td><td>+5</td></tr>
+    <tr><td>17&ndash;20</td><td>+6</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Source: <a href="https://5e24srd.com/index.html">SRD 5.2 — Using Ability Scores</a> &middot;
+  Back to <a href="../lessons/0001-the-d20-check.html">Lesson 01</a>
+</div>
+
+</body>
+</html>

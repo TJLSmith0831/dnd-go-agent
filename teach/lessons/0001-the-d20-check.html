@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 01 — The d20 Check</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #faf9f7;
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    .lesson-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: #999;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      line-height: 1.15;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 2.5rem;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+
+    h2 {
+      font-size: 1.45rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.75rem;
+      margin-bottom: 0.4rem;
+      color: #222;
+    }
+
+    p { margin-bottom: 1rem; }
+
+    .tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.15em 0.55em;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .tag-dnd  { background: #f3e8e8; color: #8b0000; }
+    .tag-go   { background: #e8f0f3; color: #005580; }
+    .tag-gotcha { background: #fff3e0; color: #7a4400; }
+
+    .formula {
+      background: #f0ede8;
+      border-left: 3px solid #8b0000;
+      padding: 0.65rem 1.25rem;
+      margin: 1.1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.1rem 0;
+      font-size: 0.95rem;
+    }
+    th {
+      text-align: left;
+      padding: 0.45rem 0.8rem;
+      border-bottom: 2px solid #1a1a1a;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    td {
+      padding: 0.35rem 0.8rem;
+      border-bottom: 1px solid #e8e8e3;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1.1rem 1.4rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1.1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.83rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84em;
+      background: #eeece7;
+      padding: 0.1em 0.38em;
+      border-radius: 3px;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 1.1rem 0;
+    }
+    .compare > div {
+      padding: 0.85rem 1rem;
+      border-radius: 6px;
+    }
+    .cmp-py { background: #1c2e44; }
+    .cmp-go { background: #1c2e1c; }
+    .cmp-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+    .compare pre { margin: 0; background: none; padding: 0; font-size: 0.8rem; }
+
+    .callout {
+      background: #f8f5ef;
+      border-left: 3px solid #c8a84b;
+      padding: 0.7rem 1.2rem;
+      margin: 1.1rem 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.95rem;
+    }
+    .callout strong { color: #5a3e00; }
+
+    /* Go syntax colors (manual) */
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    .op  { color: #d4d4d4; }
+
+    /* Quiz */
+    .quiz {
+      margin-top: 3rem;
+      border-top: 2px solid #1a1a1a;
+      padding-top: 2rem;
+    }
+    .quiz > p {
+      color: #666;
+      font-size: 0.95rem;
+      font-style: italic;
+      margin-bottom: 1.75rem;
+    }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q {
+      font-weight: 600;
+      margin-bottom: 0.7rem;
+      line-height: 1.5;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.1s;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      min-height: 1.4em;
+      line-height: 1.5;
+    }
+    .ok  { color: #2d6a2d; font-weight: 600; }
+    .no  { color: #8b0000; font-weight: 600; }
+
+    .check-btn {
+      margin-top: 0.65rem;
+      padding: 0.35rem 1.1rem;
+      background: #1a1a1a;
+      color: #faf9f7;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+    .check-btn:hover { background: #3a3a3a; }
+
+    #quiz-score {
+      margin-top: 1.5rem;
+      padding: 0.9rem 1.2rem;
+      background: #f0ede8;
+      border-radius: 6px;
+      font-weight: 600;
+      display: none;
+      font-size: 1rem;
+    }
+
+    .lesson-footer {
+      margin-top: 3rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.65;
+    }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+
+    sup { font-size: 0.7em; }
+    sup a { color: #999; text-decoration: none; }
+    sup a:hover { color: #005580; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0001 &middot; Go + D&amp;D 5e</div>
+<h1>The d20 Check</h1>
+<p class="subtitle">Writing D&amp;D 5e's core resolution mechanic in Go — the first piece of your DM bot's rules engine.</p>
+
+<p>Everything in D&amp;D resolves through one atomic operation: roll a d20, add a modifier, compare to a target number. If you build exactly this in Go, you have the foundation every other rule compiles against. That's this lesson.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Ability Check</h2>
+
+<p>You've done this thousands of times in BG3 without reading the rule. Here it is written out.<sup><a href="https://5e24srd.com/index.html">[SRD 5.2]</a></sup></p>
+
+<div class="formula">
+  d20 + ability modifier (+ proficiency bonus, if applicable) &ge; DC &nbsp;&rarr;&nbsp; <strong>Success</strong>
+</div>
+
+<p>The <strong>Difficulty Class (DC)</strong> is a fixed number set by the DM — 10 for easy tasks, 15 for medium, 20 for hard, 25 for very hard. The <strong>ability modifier</strong> comes from one of the six core scores:</p>
+
+<table>
+  <thead>
+    <tr><th>Score</th><th>Modifier</th><th>Score</th><th>Modifier</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>&minus;5</td><td>12&ndash;13</td><td>+1</td></tr>
+    <tr><td>2&ndash;3</td><td>&minus;4</td><td>14&ndash;15</td><td>+2</td></tr>
+    <tr><td>4&ndash;5</td><td>&minus;3</td><td>16&ndash;17</td><td>+3</td></tr>
+    <tr><td>6&ndash;7</td><td>&minus;2</td><td>18&ndash;19</td><td>+4</td></tr>
+    <tr><td>8&ndash;9</td><td>&minus;1</td><td>20</td><td>+5</td></tr>
+    <tr><td>10&ndash;11</td><td>+0</td><td></td><td></td></tr>
+  </tbody>
+</table>
+
+<p>The formula behind the table:</p>
+<div class="formula">modifier = &lfloor;(score &minus; 10) / 2&rfloor;</div>
+
+<p>Every two points of score = one point of modifier. The floor matters — odd scores below 10 round <em>down</em> into negative territory. Score 9 gives &minus;1, not 0. This will matter when we write the Go code.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Writing the Resolver</h2>
+
+<p>Your Python instincts are almost right. The differences that will trip you up are small but rigid — Go enforces them at compile time, not at runtime.</p>
+
+<h3>Packages and Imports</h3>
+
+<p>Every Go file declares its package. The package name matches its directory. This file will live at <code>pkg/dice/dice.go</code>, so it belongs to <code>package dice</code>.<sup><a href="https://go.dev/tour/basics/1">[Tour of Go]</a></sup></p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>import random
+import math</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"math"</span>
+    <span class="str">"math/rand"</span>
+)</code></pre>
+  </div>
+</div>
+
+<p>One hard rule: <strong>the Go compiler refuses to compile if you import a package you don't use.</strong> This is not a linter. It is the language. Unused imports are a compile error.</p>
+
+<h3>Functions and Exported Names</h3>
+
+<p>Types come <em>after</em> names, not before. The return type is declared after the parameter list.</p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>def roll(sides: int) -> int:
+    return random.randint(1, sides)</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">func</span> <span class="fn">Roll</span>(sides <span class="typ">int</span>) <span class="typ">int</span> {
+    <span class="kw">return</span> rand.<span class="fn">Intn</span>(sides) + <span class="num">1</span>
+}</code></pre>
+  </div>
+</div>
+
+<p>The capital <code>R</code> in <code>Roll</code> is not style. A capitalized identifier is <strong>exported</strong> from the package — accessible to callers. Lowercase is package-private. This replaces Python's <code>__dunder</code> and single-underscore conventions with a single, consistent rule.</p>
+
+<h3><span class="tag tag-gotcha">Gotcha</span> Floor Division vs Truncation</h3>
+
+<p>Python's <code>//</code> is floor division — it rounds toward negative infinity. Go's <code>/</code> on integers truncates toward zero. They differ on negative numbers:</p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python (floor)</div>
+    <pre><code>-1 // 2  →  -1  ✓</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go (truncation)</div>
+    <pre><code>-1 / 2   →   0  ✗</code></pre>
+  </div>
+</div>
+
+<p>Score 9: <code>(9&minus;10)/2 = &minus;1/2</code>. Python gives &minus;1 (correct for D&amp;D). Go gives 0 (wrong). Fix it with <code>math.Floor</code>, which also introduces Go's explicit type conversion — there's no implicit numeric coercion:</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">AbilityModifier</span>(score <span class="typ">int</span>) <span class="typ">int</span> {
+    <span class="kw">return</span> int(math.<span class="fn">Floor</span>(float64(score-<span class="num">10</span>) / <span class="num">2</span>))
+}</code></pre>
+
+<p><code>float64(score-10)</code> converts the integer to a float. <code>int(...)</code> converts back. Go makes every conversion visible in the code — types never silently widen or narrow.</p>
+
+<h3>Errors Are Values</h3>
+
+<p>Go has no exceptions. Errors are return values. A function that can fail returns <code>(result, error)</code> — two values at once:</p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python (raises)</div>
+    <pre><code>def roll(sides):
+    if sides < 2:
+        raise ValueError("need ≥2 sides")
+    return random.randint(1, sides)</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go (returns error)</div>
+    <pre><code><span class="kw">func</span> <span class="fn">Roll</span>(sides <span class="typ">int</span>) (<span class="typ">int</span>, <span class="typ">error</span>) {
+    <span class="kw">if</span> sides < <span class="num">2</span> {
+        <span class="kw">return</span> <span class="num">0</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"need ≥2 sides, got %d"</span>, sides)
+    }
+    <span class="kw">return</span> rand.<span class="fn">Intn</span>(sides) + <span class="num">1</span>, <span class="kw">nil</span>
+}</code></pre>
+  </div>
+</div>
+
+<p>The caller receives both values and decides what to do with the error. It cannot accidentally ignore it — if the caller assigns both values, the compiler enforces that both are used (or explicitly discarded with <code>_</code>).</p>
+
+<h3>Structs Replace Classes</h3>
+
+<p>Go has no classes. A struct is a named grouping of typed fields. Methods can be attached separately. For returning a rich result from <code>AbilityCheck</code>, a struct is exactly right:</p>
+
+<pre><code><span class="typ">type</span> <span class="fn">CheckResult</span> <span class="kw">struct</span> {
+    Roll     <span class="typ">int</span>
+    Modifier <span class="typ">int</span>
+    Total    <span class="typ">int</span>
+    DC       <span class="typ">int</span>
+    Success  <span class="typ">bool</span>
+}</code></pre>
+
+<p><code>CheckResult{}</code> creates a zero-value struct — every field set to its zero: <code>int</code> → 0, <code>bool</code> → false, <code>string</code> → "". Go doesn't have <code>None</code>; it has zero values. This matters for error returns.</p>
+
+<h3>The Complete File</h3>
+
+<p>This is <code>pkg/dice/dice.go</code> — the rules engine's foundation:</p>
+
+<pre><code><span class="kw">package</span> dice
+
+<span class="kw">import</span> (
+	<span class="str">"fmt"</span>
+	<span class="str">"math"</span>
+	<span class="str">"math/rand"</span>
+)
+
+<span class="cmt">// Roll returns a random number from 1 to sides, inclusive.</span>
+<span class="kw">func</span> <span class="fn">Roll</span>(sides <span class="typ">int</span>) (<span class="typ">int</span>, <span class="typ">error</span>) {
+	<span class="kw">if</span> sides < <span class="num">2</span> {
+		<span class="kw">return</span> <span class="num">0</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"Roll: need at least 2 sides, got %d"</span>, sides)
+	}
+	<span class="kw">return</span> rand.<span class="fn">Intn</span>(sides) + <span class="num">1</span>, <span class="kw">nil</span>
+}
+
+<span class="cmt">// AbilityModifier converts a D&amp;D 5e ability score to its modifier.</span>
+<span class="cmt">// Uses floor division — Go's integer division truncates toward zero,</span>
+<span class="cmt">// which gives the wrong result for odd scores below 10.</span>
+<span class="kw">func</span> <span class="fn">AbilityModifier</span>(score <span class="typ">int</span>) <span class="typ">int</span> {
+	<span class="kw">return</span> int(math.<span class="fn">Floor</span>(float64(score-<span class="num">10</span>) / <span class="num">2</span>))
+}
+
+<span class="cmt">// CheckResult holds the outcome of a D&amp;D 5e ability check.</span>
+<span class="kw">type</span> <span class="fn">CheckResult</span> <span class="kw">struct</span> {
+	Roll     <span class="typ">int</span>
+	Modifier <span class="typ">int</span>
+	Total    <span class="typ">int</span>
+	DC       <span class="typ">int</span>
+	Success  <span class="typ">bool</span>
+}
+
+<span class="cmt">// AbilityCheck resolves a D&amp;D 5e ability check against a Difficulty Class.</span>
+<span class="kw">func</span> <span class="fn">AbilityCheck</span>(abilityScore, dc <span class="typ">int</span>) (<span class="typ">CheckResult</span>, <span class="typ">error</span>) {
+	roll, err := <span class="fn">Roll</span>(<span class="num">20</span>)
+	<span class="kw">if</span> err != <span class="kw">nil</span> {
+		<span class="kw">return</span> <span class="fn">CheckResult</span>{}, err
+	}
+	mod := <span class="fn">AbilityModifier</span>(abilityScore)
+	total := roll + mod
+	<span class="kw">return</span> <span class="fn">CheckResult</span>{
+		Roll:     roll,
+		Modifier: mod,
+		Total:    total,
+		DC:       dc,
+		Success:  total >= dc,
+	}, <span class="kw">nil</span>
+}</code></pre>
+
+<div class="callout">
+  <strong>Go idiom: <code>:=</code> vs <code>=</code></strong><br>
+  <code>roll, err := Roll(20)</code> — the <code>:=</code> operator declares <em>and</em> assigns in one step. Use it for new variables. Plain <code>=</code> assigns to an existing variable. You'll see <code>:=</code> constantly in Go; it's how most local variables are born.
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>Answer from memory — don't scroll up. The friction is the point.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. What is the ability modifier for a character with Strength 9?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> negative two</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> positive zero</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> negative one</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> positive one</label>
+    </div>
+    <button class="check-btn" onclick="check('q1','c','⌊(9−10)/2⌋ = ⌊−0.5⌋ = −1. Go’s integer division would give 0 here — the floor is what makes D&amp;D modifiers work correctly.')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. In Go, what makes an identifier accessible from other packages?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> marked with pub</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> name is capitalized</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> placed in main</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> uses export keyword</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','b','Capitalized name = exported. Lowercase = package-private. No keyword, no annotation — just the first letter.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A character with Wisdom 14 rolls a 9 on a Perception check against DC 15. What happens?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> success, total beats dc</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> failure, total misses dc</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> tie, needs another roll</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> success, dc equals total</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','WIS 14 → modifier +2. Roll 9 + 2 = 11. DC 15. 11 &lt; 15 → failure. (You need &ge; DC to succeed.)')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. What happens in Go if you import a package and never use it?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> a warning gets logged</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> the code compiles fine</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> the compiler refuses it</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> a linter flags it</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','c','Unused imports are a compile error in Go — enforced by the language, not a linter. The compiler refuses to produce a binary.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://go.dev/tour/basics/1">A Tour of Go — Basics</a>. Work through "Packages", "Imports", "Functions", and "Types" sections. It's interactive, runs in the browser. Budget 30&ndash;45 min.</p>
+  <p><strong>D&amp;D reference &rarr;</strong> <a href="https://5e24srd.com/index.html">SRD 5.2</a>. Search "Using Ability Scores" for the authoritative rules text on checks, saving throws, and the modifier table.</p>
+  <p><strong>Reference doc &rarr;</strong> <a href="../reference/ability-scores.html">Ability Scores &amp; Modifiers</a> — a quick-reference table for future lessons.</p>
+  <hr style="margin: 1rem 0;">
+  <p style="color: #888;">Ask your agent about anything that's unclear, surprising, or that you want to dig deeper on. That's what it's here for.</p>
+</div>
+
+<script>
+  const answered = {};
+
+  function check(qid, correct, explanation) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) {
+      fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>';
+      return;
+    }
+    answered[qid] = sel.value === correct;
+    if (sel.value === correct) {
+      fb.innerHTML = `<span class="ok">&#10003; Correct.</span> ${explanation}`;
+    } else {
+      fb.innerHTML = `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    }
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      const msg = score === 4
+        ? 'All four. Move on to lesson 2.'
+        : score >= 3
+        ? 'Good — review what you missed, then continue.'
+        : 'Review the lesson once more before the next one.';
+      el.textContent = `Score: ${score}/4. ${msg}`;
+    }
+  }
+</script>
+</body>
+</html>
