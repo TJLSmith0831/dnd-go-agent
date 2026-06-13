@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 03 — Combat &amp; Action Economy</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #faf9f7;
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; color: #222; }
+    p { margin-bottom: 1rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-dnd    { background: #f3e8e8; color: #8b0000; }
+    .tag-bot    { background: #e8eaf3; color: #1a1a8b; }
+
+    .formula {
+      background: #f0ede8;
+      border-left: 3px solid #8b0000;
+      padding: 0.65rem 1.25rem;
+      margin: 1.1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.6;
+    }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.95rem; }
+    th { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 2px solid #1a1a1a; font-weight: 600; font-size: 0.9rem; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #e8e8e3; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+
+    /* Turn structure diagram */
+    .turn-diagram {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin: 1.25rem 0;
+    }
+    .turn-slot {
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      padding: 0.75rem 0.6rem;
+      text-align: center;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .turn-slot .slot-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+    .turn-slot .slot-desc { color: #555; font-size: 0.82rem; }
+    .slot-move  { border-color: #4a9e4a; }
+    .slot-move .slot-name { color: #2a6e2a; }
+    .slot-action { border-color: #8b0000; }
+    .slot-action .slot-name { color: #8b0000; }
+    .slot-bonus { border-color: #c8a84b; }
+    .slot-bonus .slot-name { color: #7a5a00; }
+    .slot-react { border-color: #5566cc; }
+    .slot-react .slot-name { color: #2233aa; }
+
+    /* Combat flow */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1.25rem 0;
+      position: relative;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid #e8e8e3;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #8b0000;
+      flex-shrink: 0;
+      width: 1.6rem;
+      padding-top: 0.05rem;
+    }
+    .flow-body { flex: 1; font-size: 0.95rem; line-height: 1.6; }
+    .flow-body strong { display: block; margin-bottom: 0.1rem; }
+
+    /* Advantage visual */
+    .adv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 1.1rem 0;
+    }
+    .adv-card {
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+    .adv-card .adv-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+    }
+    .adv-advantage { background: #e8f3e8; }
+    .adv-advantage .adv-title { color: #2a6e2a; }
+    .adv-disadvantage { background: #f3e8e8; }
+    .adv-disadvantage .adv-title { color: #8b0000; }
+
+    /* Quiz */
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+    sup a { color: #999; font-size: 0.7em; text-decoration: none; }
+    sup a:hover { color: #005580; }
+
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0003 &middot; D&amp;D 5e</div>
+<h1>Combat &amp; Action Economy</h1>
+<p class="subtitle">Everything that happens in a single fight — and what your DM bot needs to track to adjudicate it.</p>
+
+<p>You've felt this in BG3 without naming it. A rogue gets one Attack action but uses a Bonus Action to hide. A paladin casts <em>Smite</em> on a hit but can't use that reaction on their own turn. These aren't bugs — they're the <strong>action economy</strong>, the resource system underneath every combat turn. Understanding it is what separates a DM who rules correctly from one who wings it.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Combat Loop</h2>
+
+<p>Combat follows a strict sequence.<sup><a href="https://5e24srd.com/index.html">[SRD 5.2]</a></sup> The bot must enforce it:</p>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num">1</div>
+    <div class="flow-body"><strong>Surprise check</strong> — if any combatants are unaware, they are <em>surprised</em> and skip their first turn entirely. The DM decides who is surprised.</div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">2</div>
+    <div class="flow-body"><strong>Roll Initiative</strong> — every combatant rolls d20 + DEX modifier. This sets the turn order for the entire encounter. Ties: players choose among themselves; DM chooses among monsters.</div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">3</div>
+    <div class="flow-body"><strong>Take turns</strong> — highest initiative goes first. Each combatant takes a full turn (see below), then the next, cycling through the order until combat ends.</div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">4</div>
+    <div class="flow-body"><strong>Start new round</strong> — when everyone has gone once, a new round begins. Most effects that "last until the start of your next turn" tick here. Repeat until one side is dead, fled, or surrendered.</div>
+  </div>
+</div>
+
+<div class="formula">Initiative = d20 + DEX modifier</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Your Turn: The Four Resources</h2>
+
+<p>Each turn, a creature gets four distinct resources. They do not stack, they do not carry over, and they are not interchangeable:</p>
+
+<div class="turn-diagram">
+  <div class="turn-slot slot-move">
+    <div class="slot-name">Movement</div>
+    <div class="slot-desc">Speed in feet. Can be split before/after action. Default 30 ft.</div>
+  </div>
+  <div class="turn-slot slot-action">
+    <div class="slot-name">Action</div>
+    <div class="slot-desc">The main event. Attack, cast a spell, Help, Dodge, Dash, etc.</div>
+  </div>
+  <div class="turn-slot slot-bonus">
+    <div class="slot-name">Bonus Action</div>
+    <div class="slot-desc">Only usable if a rule specifically grants one. Not a free mini-action.</div>
+  </div>
+  <div class="turn-slot slot-react">
+    <div class="slot-name">Reaction</div>
+    <div class="slot-desc">Once per round, on anyone's turn (not just yours). Opportunity attacks, Shield spell, etc.</div>
+  </div>
+</div>
+
+<div class="callout">
+  <strong>The biggest DM mistake:</strong> treating Bonus Actions as "free." They are not. A Bonus Action only exists when a feature, spell, or rule explicitly says "as a bonus action." If nothing grants you one, you don't have one. This trips up new DMs constantly.
+</div>
+
+<h3>Common Action choices</h3>
+
+<table>
+  <thead><tr><th>Action</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Attack</strong></td><td>Make one or more weapon attacks (number depends on class level)</td></tr>
+    <tr><td><strong>Cast a Spell</strong></td><td>Cast a spell with a casting time of 1 action</td></tr>
+    <tr><td><strong>Dash</strong></td><td>Double your movement speed for the turn</td></tr>
+    <tr><td><strong>Disengage</strong></td><td>Move without provoking opportunity attacks this turn</td></tr>
+    <tr><td><strong>Dodge</strong></td><td>Attackers have Disadvantage against you; you have Advantage on DEX saves (until your next turn)</td></tr>
+    <tr><td><strong>Help</strong></td><td>Give one ally Advantage on their next ability check or attack roll</td></tr>
+    <tr><td><strong>Hide</strong></td><td>Make a DEX (Stealth) check to become hidden</td></tr>
+    <tr><td><strong>Ready</strong></td><td>Declare a trigger; use your Reaction to act when it occurs</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Attack Roll</h2>
+
+<p>When a creature takes the Attack action, each individual attack resolves in three steps:</p>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num">1</div>
+    <div class="flow-body">
+      <strong>Roll to hit</strong>
+      <div class="formula" style="margin-top:0.4rem">d20 + ability modifier + proficiency bonus (if proficient) vs. target's AC</div>
+      <em>Ability modifier:</em> STR for melee, DEX for ranged (or finesse weapons). Proficiency bonus applies if you're proficient with the weapon. Meet or beat the AC to hit.
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">2</div>
+    <div class="flow-body">
+      <strong>Roll damage</strong> — if the attack hit, roll the weapon's damage die and add the same ability modifier used to hit.
+      <div class="formula" style="margin-top:0.4rem">damage die + ability modifier</div>
+      Example: longsword (1d8) + STR +3 → roll 1d8, add 3.
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">3</div>
+    <div class="flow-body">
+      <strong>Apply damage</strong> — subtract from the target's current HP. At 0 HP, the creature falls <em>unconscious</em> (if a PC) or dies (if a monster, unless the DM decides otherwise).
+    </div>
+  </div>
+</div>
+
+<h3>Critical Hit</h3>
+<p>A natural 20 (the die shows 20, before modifiers) is a <strong>critical hit</strong>: roll all damage dice <em>twice</em> and add them together, then add the modifier once. A natural 1 always misses regardless of modifiers.</p>
+
+<div class="formula">
+  Crit damage = (damage die × 2) + ability modifier<br>
+  <span style="font-size:0.85em; opacity:0.75">e.g. longsword crit = roll 2d8 + STR modifier</span>
+</div>
+
+<h3>Armour Class (AC)</h3>
+
+<p>AC is a static defence value — the number the attacker must meet or beat. It comes from armor, shield, and in some cases DEX modifier:</p>
+
+<table>
+  <thead><tr><th>Armor type</th><th>Base AC formula</th></tr></thead>
+  <tbody>
+    <tr><td>Unarmored</td><td>10 + DEX modifier</td></tr>
+    <tr><td>Light armor</td><td>armor value + DEX modifier</td></tr>
+    <tr><td>Medium armor</td><td>armor value + DEX modifier (max +2)</td></tr>
+    <tr><td>Heavy armor</td><td>armor value (DEX ignored)</td></tr>
+    <tr><td>+Shield</td><td>+2 to any of the above</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Advantage &amp; Disadvantage</h2>
+
+<p>This mechanic replaces a dozen situational modifiers with one binary state. You either have it or you don't — and they cancel each other out regardless of how many sources you have.</p>
+
+<div class="adv-grid">
+  <div class="adv-card adv-advantage">
+    <div class="adv-title">Advantage</div>
+    Roll the d20 <strong>twice</strong>, use the <strong>higher</strong> result. Granted by flanking, the Help action, certain spells, attacking while hidden, and more.
+  </div>
+  <div class="adv-card adv-disadvantage">
+    <div class="adv-title">Disadvantage</div>
+    Roll the d20 <strong>twice</strong>, use the <strong>lower</strong> result. Caused by being Prone for ranged attacks, being Blinded, Poisoned, attacking while restrained, and more.
+  </div>
+</div>
+
+<div class="callout">
+  <strong>They cancel out perfectly.</strong> One source of Advantage + one source of Disadvantage = normal roll. It doesn't matter if you have three sources of Advantage — one Disadvantage cancels all of them. This simplicity is intentional.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Hit Points &amp; Death</h2>
+
+<p>HP is the buffer between a creature and death. It has a maximum (set by class and CON modifier) and a current value that changes as damage is taken and healing is received.</p>
+
+<p><strong>At 0 HP:</strong></p>
+<ul>
+  <li><strong>Monsters</strong> — die (or are incapacitated if the DM chooses to knock them out)</li>
+  <li><strong>Player characters</strong> — fall <em>unconscious</em> and begin making <strong>Death Saving Throws</strong> on each of their turns: roll d20, no modifiers. 10+ = success, 9 or below = failure. Three successes = stabilized. Three failures = dead. A natural 20 = regain 1 HP and wake up.</li>
+</ul>
+
+<div class="bot-note">
+  <strong>What the bot must track per combatant:</strong><br>
+  current HP &nbsp;&middot;&nbsp; max HP &nbsp;&middot;&nbsp; AC &nbsp;&middot;&nbsp; initiative score &nbsp;&middot;&nbsp; ability scores (for modifiers) &nbsp;&middot;&nbsp; proficiency bonus &nbsp;&middot;&nbsp; available actions this turn &nbsp;&middot;&nbsp; conditions (prone, unconscious, etc.)
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling. The friction builds the memory.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. A rogue wants to use a Bonus Action to Dash on their turn, but no class feature specifically grants this. What happens?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> they can dash freely</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> they cannot do it</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> they roll for it</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> dm decides each time</label>
+    </div>
+    <button class="check-btn" onclick="check('q1','b','Bonus Actions only exist when a specific rule grants them. No rule = no Bonus Action. (Cunning Action does grant rogues a Bonus Action Dash — but that\'s the feature granting it, not a general rule.)')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. A fighter (STR 16, proficiency +3) attacks with a longsword against a goblin with AC 13. The d20 shows 8. Does the attack hit?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> yes, total beats ac</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> no, total misses ac</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> yes, crits on eight</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> no, need natural ten</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','a','STR 16 → modifier +3. Attack roll = 8 + 3 (STR) + 3 (proficiency) = 14. 14 ≥ 13 → hit.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A character has both Advantage (from the Help action) and Disadvantage (from being Poisoned) on the same attack roll. How many dice do they roll?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> three dice, pick best</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> one die, they cancel</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> two dice, pick worst</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> two dice, pick best</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','Any Advantage + any Disadvantage = straight roll. One die. It doesn\'t matter how many sources of each you have.')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. A PC drops to 0 HP. On their next turn they roll a Death Saving Throw and get a 6. How many failures do they now have?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> zero, six is fine</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> one, they need ten</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> two, six means two</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> they die immediately</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','b','10+ = success, 9 or below = one failure. 6 is below 10 → one failure. Three failures = death. Three successes = stabilized.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://5e24srd.com/index.html">SRD 5.2</a> — search "Combat" and read the "Order of Combat" and "Making an Attack" sections. This is the authoritative source your bot must implement.</p>
+  <p><strong>Reference &rarr;</strong> <a href="../reference/ability-scores.html">Ability Scores &amp; Modifiers</a> — attack rolls use the same modifier table.</p>
+  <p><strong>Next &rarr;</strong> Go: Methods &amp; Interfaces — attaching behavior to your combat types and defining the agent protocol.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0002-table-driven-tests.html">Lesson 02: Table-Driven Tests</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent anything — rules edge cases, how BG3 differs from tabletop, how to model any of this in Go.</p>
+</div>
+
+<script>
+  const answered = {};
+  function check(qid, correct, explanation) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answered[qid] = sel.value === correct;
+    fb.innerHTML = sel.value === correct
+      ? `<span class="ok">&#10003; Correct.</span> ${explanation}`
+      : `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Next lesson: Go methods and interfaces.' : score >= 3 ? 'Good — review what you missed before moving on.' : 'Reread the combat loop sections before the next lesson.'}`;
+    }
+  }
+</script>
+</body>
+</html>
