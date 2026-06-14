@@ -71,3 +71,52 @@ func TestRoll(t *testing.T) {
 		}
 	})
 }
+
+// `AbilityCheck` already handles d20 + modifier vs. DC. `SkillCheck` is the same with one
+// extra step: look up the character's proficiency bonus. The `CheckResult` struct
+// already includes a `Modifier` field that can hold the total modifier.
+func TestSkillCheck(t *testing.T) {
+	t.Run("proficient character includes proficiency bonus in modifier", func(t *testing.T) {
+		// STR 10 (mod 0), proficiency +3, proficient → modifier must be 3
+		for range 20 {
+			result, err := SkillCheck(10, 3, true, 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Modifier != 3 {
+				t.Errorf("proficient: got Modifier %d, want 3", result.Modifier)
+			}
+		}
+	})
+
+	t.Run("non-proficient character omits proficiency bonus", func(t *testing.T) {
+		// STR 10 (mod 0), proficiency +3, NOT proficient → modifier must be 0
+		for range 20 {
+			result, err := SkillCheck(10, 3, false, 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Modifier != 0 {
+				t.Errorf("non-proficient: got Modifier %d, want 0", result.Modifier)
+			}
+		}
+	})
+}
+
+func TestPassiveCheck(t *testing.T) {
+	t.Run("proficient passive perception", func(t *testing.T) {
+		// WIS 14 (mod +2), proficiency +3, proficient → 10 + 2 + 3 = 15
+		got := PassiveCheck(14, 3, true)
+		if got != 15 {
+			t.Errorf("got %d, want 15", got)
+		}
+	})
+
+	t.Run("non-proficient passive check", func(t *testing.T) {
+		// WIS 14 (mod +2), not proficient → 10 + 2 = 12
+		got := PassiveCheck(14, 3, false)
+		if got != 12 {
+			t.Errorf("got %d, want 12", got)
+		}
+	})
+}

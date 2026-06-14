@@ -2,7 +2,7 @@ package session
 
 import "context"
 
-/**
+/*
 In Python, you reach for asyncio or threads when you need to do two things at once.
 Go has a different answer: goroutines and channels. These aren't a library bolt-on,
 and they're built into the language. Understanding them is the biggest conceptual jump
@@ -11,7 +11,7 @@ handling multiple Discord guilds, routing agent messages, processing dice rolls,
 and processing a narrative response.
 */
 
-/**
+/*
 ## Goroutines
 A goroutine is a function running concurrently with the rest of your program. You launch
 one with the go keyword: `go someFunction()`. That's it. The function starts immediately in the background.
@@ -29,7 +29,7 @@ you signal it through a channel. This matters: a goroutine that's blocked waitin
 no sender will leak and never exit. The Go race detector (got test -race) can help catch these leaks.
 */
 
-/**
+/*
 ## Channels
 Goroutines communicate through channels. A channel is a typed pipe: you send
 a value in from one end and receive it out the other. The Go mantra is:
@@ -85,7 +85,7 @@ Closing the channel from the sender side signals "no more values." Closing from 
 side is a panic — only the sender closes.
 */
 
-/**
+/*
 ## Select Statements
 `select` is like a switch for channel operations. It blocks until one of its cases is ready,
 then executes that case. If multiple are ready, it picks one at random.
@@ -104,7 +104,7 @@ The done channel pattern is the standard way to cancel a goroutine: the parent c
 
 */
 
-/**
+/*
 How this all maps to the bot:
 - One goroutine per Discord server (guild) / Slack workspace that's running a game.
 - It loops over an incoming message channel with `for range` and a `done` channel in select.
@@ -126,7 +126,7 @@ How this all maps to the bot:
 // 	}
 // }
 
-/**
+/*
 ## context.Context
 
 `context.Context` is a standard way to pass cancellation signals, deadlines, and key-value pairs

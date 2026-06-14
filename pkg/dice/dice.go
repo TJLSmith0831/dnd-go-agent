@@ -75,3 +75,43 @@ func (c CheckResult) String() string {
 		c.Roll, c.Modifier, c.Total, c.DC, outcome,
 	)
 }
+
+/**
+The Referee Agent's Decision Tree
+When a player sends a free-text action, the referee agent must work through four questions:
+
+ 1. Is a check even needed? Trivial tasks (walking through an open door) auto-succeed.
+    Impossible tasks (jumping to the moon) auto-fail. Only uncertain outcomes need a roll.
+ 2. Which skill applies? Map the action to one of the 18 skills (or a raw ability check if no skill fits).
+ 3. Is the character proficient? Look up their character sheet. Add proficiency bonus if yes,
+    expertise if applicable.
+ 4. What's the DC? Easy 10, Medium 15, Hard 20, Very Hard 25, Nearly Impossible 30.
+
+Then call SkillCheck and narrate the result.
+*/
+func SkillCheck(score, profBonus int, proficient bool, dc int) (CheckResult, error) {
+	roll, err := Roll(20)
+	if err != nil {
+		return CheckResult{}, err
+	}
+	mod := AbilityModifier(score)
+	if proficient {
+		mod += profBonus
+	}
+	total := roll + mod
+	return CheckResult{
+		Roll:     roll,
+		Modifier: mod,
+		Total:    total,
+		DC:       dc,
+		Success:  total >= dc,
+	}, nil
+}
+
+func PassiveCheck(score, profBonus int, proficient bool) int {
+	mod := AbilityModifier(score)
+	if proficient {
+		mod += profBonus
+	}
+	return 10 + mod
+}
