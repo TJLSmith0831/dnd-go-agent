@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 06 — Type Assertions &amp; Type Switches</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go     { background: #e8f0f3; color: #005580; }
+    .tag-dnd    { background: #f3e8e8; color: #8b0000; }
+    .tag-tdd    { background: #e8f3e8; color: #1a5c1a; }
+    .tag-gotcha { background: #fff3e0; color: #7a4400; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.1rem 0; }
+    .compare > div { padding: 0.85rem 1rem; border-radius: 6px; }
+    .cmp-py { background: #1c2e44; }
+    .cmp-go { background: #1c2e1c; }
+    .cmp-label { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.4rem; }
+    .compare pre { margin: 0; background: none; padding: 0; font-size: 0.8rem; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .alert { background: #fdf0f0; border-left: 3px solid #8b0000; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .alert strong { color: #8b0000; }
+    .tdd-box { background: #f0f7f0; border-left: 3px solid #2a6e2a; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .tdd-box strong { color: #1a5c1a; }
+    .fail-box { background: #1e1e1e; color: #f85149; padding: 0.85rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.6; }
+    .pass-box { background: #1e1e1e; color: #3fb950; padding: 0.85rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.6; }
+
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+    sup a { color: #999; font-size: 0.7em; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0006 &middot; Go</div>
+<h1>Type Assertions &amp; Type Switches</h1>
+<p class="subtitle">Asking "what are you, really?" — and building the combat loop's 0&nbsp;HP handler the TDD way.</p>
+
+<p>The combat loop has a problem: when a combatant reaches 0&nbsp;HP, it needs to do different things depending on whether it's a <code>*PlayerCharacter</code> or a <code>*Monster</code>. The <code>Combatant</code> interface can't express this difference — and it shouldn't. <strong>Type assertions</strong> are Go's mechanism for reaching past an interface to the concrete type underneath.</p>
+
+<hr>
+
+<h2><span class="tag tag-tdd">TDD</span> Write the Test First</h2>
+
+<p>We want a function <code>HandleZeroHP(c Combatant)</code> that returns a string describing what happened. Monsters die. PCs enter death saves. Write the test before writing a line of implementation.</p>
+
+<p>Add to <code>pkg/combat/combatant_test.go</code>:</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">TestHandleZeroHP</span>(t *testing.<span class="typ">T</span>) {
+    t.<span class="fn">Run</span>(<span class="str">"monster dies at zero HP"</span>, <span class="kw">func</span>(t *testing.<span class="typ">T</span>) {
+        m := &<span class="typ">Monster</span>{name: <span class="str">"Goblin"</span>, currentHP: <span class="num">0</span>, maxHP: <span class="num">7</span>}
+        outcome := <span class="fn">HandleZeroHP</span>(m)
+        <span class="kw">if</span> outcome != OutcomeDead {
+            t.<span class="fn">Errorf</span>(<span class="str">"got %v, want OutcomeDead"</span>, outcome)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"PC at zero HP makes a death save"</span>, <span class="kw">func</span>(t *testing.<span class="typ">T</span>) {
+        pc := &<span class="typ">PlayerCharacter</span>{name: <span class="str">"Aria"</span>, currentHP: <span class="num">0</span>, maxHP: <span class="num">28</span>}
+        outcome := <span class="fn">HandleZeroHP</span>(pc)
+        <span class="kw">if</span> outcome != OutcomeDeathSave && outcome != OutcomeStabilized &&
+            outcome != OutcomeDead && outcome != OutcomeAwakened {
+            t.<span class="fn">Errorf</span>(<span class="str">"unexpected outcome for PC: %v"</span>, outcome)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"non-zero HP combatant is unaffected"</span>, <span class="kw">func</span>(t *testing.<span class="typ">T</span>) {
+        m := &<span class="typ">Monster</span>{name: <span class="str">"Ogre"</span>, currentHP: <span class="num">30</span>, maxHP: <span class="num">59</span>}
+        outcome := <span class="fn">HandleZeroHP</span>(m)
+        <span class="kw">if</span> outcome != OutcomeAlive {
+            t.<span class="fn">Errorf</span>(<span class="str">"got %v, want OutcomeAlive"</span>, outcome)
+        }
+    })
+}</code></pre>
+
+<div class="fail-box">./combatant_test.go:XX: undefined: HandleZeroHP
+./combatant_test.go:XX: undefined: OutcomeDead
+FAIL	[build failed]</div>
+
+<p>Good. Now build what the test demands.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Type Assertions</h2>
+
+<p>A type assertion extracts the concrete value from an interface variable. There are two forms:<sup><a href="https://go.dev/tour/methods/15">[Tour of Go]</a></sup></p>
+
+<pre><code><span class="cmt">// Single-value form — panics if c is not *PlayerCharacter</span>
+pc := c.(*<span class="typ">PlayerCharacter</span>)
+
+<span class="cmt">// Two-value form — safe, ok is false if the assertion fails</span>
+pc, ok := c.(*<span class="typ">PlayerCharacter</span>)
+<span class="kw">if</span> ok {
+    <span class="cmt">// pc is a *PlayerCharacter here</span>
+}</code></pre>
+
+<div class="alert">
+  <strong>Always use the two-value form</strong> unless you are certain of the type and a panic is acceptable. The single-value form is rare in production code — it's mostly used in tests or when a wrong type is truly a programming error that should crash immediately.
+</div>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>if isinstance(c, PlayerCharacter):
+    pc = c
+    pc.death_saving_throw()</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">if</span> pc, ok := c.(*<span class="typ">PlayerCharacter</span>); ok {
+    pc.<span class="fn">DeathSavingThrow</span>()
+}</code></pre>
+  </div>
+</div>
+
+<p>The Go form declares <code>pc</code> and <code>ok</code> in the same <code>if</code> initializer — both are scoped to the <code>if</code> block. <code>pc</code> is typed as <code>*PlayerCharacter</code> inside, so you can call any method on it, not just those on the <code>Combatant</code> interface.</p>
+
+<h3>Type Switches</h3>
+
+<p>When you need to branch on more than one possible type, a type switch is cleaner than chaining assertions:</p>
+
+<pre><code><span class="kw">switch</span> v := c.(<span class="kw">type</span>) {
+<span class="kw">case</span> *<span class="typ">PlayerCharacter</span>:
+    <span class="cmt">// v is *PlayerCharacter here</span>
+    v.<span class="fn">DeathSavingThrow</span>()
+<span class="kw">case</span> *<span class="typ">Monster</span>:
+    <span class="cmt">// v is *Monster here</span>
+    fmt.<span class="fn">Printf</span>(<span class="str">"%s is slain\n"</span>, v.<span class="fn">Name</span>())
+<span class="kw">default</span>:
+    <span class="cmt">// v is Combatant — the original interface type</span>
+}</code></pre>
+
+<p>Inside each <code>case</code>, <code>v</code> is automatically typed as the matched concrete type. No manual cast needed.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> <span class="tag tag-dnd">D&amp;D</span> Implementing <code>HandleZeroHP</code></h2>
+
+<p>First, define the outcome type. Using a named string type (rather than plain strings) means the compiler catches typos at the call site:</p>
+
+<pre><code><span class="kw">type</span> <span class="typ">ZeroHPOutcome</span> <span class="typ">string</span>
+
+<span class="kw">const</span> (
+    <span class="typ">OutcomeAlive</span>     <span class="typ">ZeroHPOutcome</span> = <span class="str">"alive"</span>
+    <span class="typ">OutcomeDead</span>      <span class="typ">ZeroHPOutcome</span> = <span class="str">"dead"</span>
+    <span class="typ">OutcomeDeathSave</span> <span class="typ">ZeroHPOutcome</span> = <span class="str">"death_save"</span>
+    <span class="typ">OutcomeStabilized</span> <span class="typ">ZeroHPOutcome</span> = <span class="str">"stabilized"</span>
+    <span class="typ">OutcomeAwakened</span>  <span class="typ">ZeroHPOutcome</span> = <span class="str">"awakened"</span>
+)</code></pre>
+
+<div class="callout">
+  <strong>Named types vs type aliases</strong><br>
+  <code>type ZeroHPOutcome string</code> creates a <em>new type</em> — you cannot accidentally assign a plain <code>string</code> to a <code>ZeroHPOutcome</code> variable without an explicit conversion. This is intentional: it prevents passing <code>"ded"</code> where <code>OutcomeDead</code> is expected. It's a lightweight alternative to an enum.
+</div>
+
+<p>Now the function:</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">HandleZeroHP</span>(c <span class="typ">Combatant</span>) <span class="typ">ZeroHPOutcome</span> {
+    <span class="kw">if</span> c.<span class="fn">CurrentHP</span>() > <span class="num">0</span> {
+        <span class="kw">return</span> <span class="typ">OutcomeAlive</span>
+    }
+
+    <span class="kw">switch</span> v := c.(<span class="kw">type</span>) {
+    <span class="kw">case</span> *<span class="typ">PlayerCharacter</span>:
+        result, err := v.<span class="fn">DeathSavingThrow</span>()
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            <span class="kw">return</span> <span class="typ">OutcomeDead</span>  <span class="cmt">// shouldn't happen — HP check above guards it</span>
+        }
+        <span class="kw">switch</span> {
+        <span class="kw">case</span> result.Awakened:
+            <span class="kw">return</span> <span class="typ">OutcomeAwakened</span>
+        <span class="kw">case</span> result.Dead:
+            <span class="kw">return</span> <span class="typ">OutcomeDead</span>
+        <span class="kw">case</span> result.Stabilized:
+            <span class="kw">return</span> <span class="typ">OutcomeStabilized</span>
+        <span class="kw">default</span>:
+            <span class="kw">return</span> <span class="typ">OutcomeDeathSave</span>
+        }
+    <span class="kw">default</span>:
+        <span class="cmt">// Monsters and anything else: dead at 0 HP</span>
+        <span class="kw">return</span> <span class="typ">OutcomeDead</span>
+    }
+}</code></pre>
+
+<div class="pass-box">$ go test ./pkg/combat/ -run TestHandleZeroHP
+ok  	github.com/tjlsmith0831/dnd-go-agent/pkg/combat	0.003s</div>
+
+<h3><span class="tag tag-gotcha">Design smell</span> When type assertions mean the interface is wrong</h3>
+
+<p>Type assertions are legitimate here because death saves are genuinely a PC-only mechanic — no interface change could cleanly express it. But watch for this anti-pattern:</p>
+
+<pre><code><span class="cmt">// Smell: type-asserting just to call a method that ALL combatants could have</span>
+<span class="kw">if</span> m, ok := c.(*<span class="typ">Monster</span>); ok {
+    m.<span class="fn">Name</span>()  <span class="cmt">// Name() is already on the Combatant interface — no assertion needed</span>
+}</code></pre>
+
+<p>If you find yourself type-asserting to call a method that conceptually applies to all combatants, the right fix is adding that method to the interface. Type assertions are for behavior that is <em>genuinely specific to one concrete type</em>.</p>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. What happens if you use the single-value form <code>pc := c.(*PlayerCharacter)</code> and <code>c</code> holds a <code>*Monster</code>?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> pc is nil, no error</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> compile error, wrong type</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> runtime panic</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> pc is a zero-value struct</label>
+    </div>
+    <button class="check-btn" onclick="check('q1','c','Single-value type assertions panic at runtime if the concrete type doesn\'t match. This is why the two-value form (v, ok := x.(T)) is preferred in almost all production code.')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. Inside a type switch <code>case *PlayerCharacter:</code>, what type does the switch variable <code>v</code> have?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> Combatant interface type</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> *PlayerCharacter concrete type</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> interface{} empty interface</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> same as the default case</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','b','In a matched case, v is automatically typed as the concrete type. No manual cast needed — you can call DeathSavingThrow() directly on v without further assertion.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. You find yourself writing <code>if m, ok := c.(*Monster); ok { m.Name() }</code>. What does this suggest?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> the code is correct and idiomatic</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> Name should be on the interface</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> Monster needs a new method</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> the interface should be removed</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','Name() already belongs on the Combatant interface — all combatants have names. Asserting to call it is a design smell: the interface is missing a method that applies to all types.')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. What is the advantage of <code>type ZeroHPOutcome string</code> over using plain <code>string</code> constants?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> it uses less memory at runtime</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> the compiler prevents misuse</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> it enables string methods</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> it makes the constants immutable</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','b','A named type is distinct from its underlying type. You can\'t accidentally pass a plain string where a ZeroHPOutcome is expected — the compiler flags it. This is Go\'s lightweight alternative to an enum.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://go.dev/tour/methods/15">A Tour of Go — Type assertions</a> and <a href="https://go.dev/tour/methods/16">Type switches</a>. Both are short — read them after the quiz.</p>
+  <p><strong>Your task &rarr;</strong> Add <code>ZeroHPOutcome</code>, the constants, and <code>HandleZeroHP</code> to <code>pkg/combat/combatant.go</code>. Write <code>TestHandleZeroHP</code> first, confirm it fails to compile, then implement until green.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0005-functions-as-values.html">Lesson 05: Functions as Values</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent if the named type distinction or the design smell rule is unclear.</p>
+</div>
+
+<script>
+  const answered = {};
+  function check(qid, correct, explanation) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answered[qid] = sel.value === correct;
+    fb.innerHTML = sel.value === correct
+      ? `<span class="ok">&#10003; Correct.</span> ${explanation}`
+      : `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Write the test, implement HandleZeroHP, run it green.' : score >= 3 ? 'Good — review what you missed.' : 'Reread the type assertion and named type sections.'}`;
+    }
+  }
+</script>
+</body>
+</html>

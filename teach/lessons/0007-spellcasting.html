@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 07 — Spellcasting</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-dnd  { background: #f3e8e8; color: #8b0000; }
+    .tag-bot  { background: #e8eaf3; color: #1a1a8b; }
+
+    .formula { background: #f0ede8; border-left: 3px solid #8b0000; padding: 0.65rem 1.25rem; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; border-radius: 0 4px 4px 0; line-height: 1.6; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.92rem; }
+    th { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 2px solid #1a1a1a; font-weight: 600; font-size: 0.88rem; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #e8e8e3; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .center { text-align: center; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+    .alert { background: #fdf0f0; border-left: 3px solid #8b0000; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+
+    /* Spell resolution paths */
+    .resolution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.1rem 0; }
+    .res-card { border-radius: 6px; padding: 0.8rem 1rem; font-size: 0.9rem; line-height: 1.6; border: 1.5px solid #ddd; }
+    .res-card .res-title { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; color: #8b0000; }
+    .res-attack { border-color: #8b0000; }
+    .res-save { border-color: #005580; }
+    .res-save .res-title { color: #005580; }
+
+    /* Concentration box */
+    .conc-box { background: #1e1e1e; color: #d4d4d4; padding: 1rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-size: 0.88rem; line-height: 1.75; }
+    .conc-box .conc-title { font-family: 'JetBrains Mono', monospace; color: #dcdcaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    .conc-ok { color: #3fb950; }
+    .conc-break { color: #f85149; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+    sup a { color: #999; font-size: 0.7em; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0007 &middot; D&amp;D 5e</div>
+<h1>Spellcasting</h1>
+<p class="subtitle">The resource system, how spells resolve, and what the DM bot must track the moment a wizard joins the party.</p>
+
+<p>Combat got manageable once you understood the action economy. Spellcasting adds a second resource layer on top of it: <strong>spell slots</strong>. A spell slot is consumed to cast a spell of that level or lower. Run out of slots and the caster is left with cantrips. This lesson covers everything the bot needs to adjudicate a spell — from the moment the player announces it to the moment it hits.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Two Resources</h2>
+
+<h3>Cantrips — unlimited</h3>
+<p>Cantrips are 0th-level spells. They cost no spell slot, can be cast any number of times, and never run out. <em>Fire Bolt</em>, <em>Minor Illusion</em>, <em>Prestidigitation</em> are all cantrips. The bot never needs to track cantrip usage — they're always available.</p>
+
+<h3>Spell Slots — limited</h3>
+<p>Leveled spells (1st through 9th level) consume a spell slot of at least that level. Slots do not recharge during a short rest for most classes — they come back on a long rest. The bot must track current slots per level for each caster.</p>
+
+<div class="callout">
+  <strong>Spell level ≠ character level.</strong> A 5th-level wizard has access to 3rd-level spell slots. A 1st-level spell like <em>Magic Missile</em> can be cast using a 3rd-level slot for extra effect. The slot level is the resource; the spell level is the minimum slot required.
+</div>
+
+<h3>Slot table for full casters (Wizard, Cleric, Sorcerer, Druid, Bard)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Char. Level</th>
+      <th class="center">1st</th><th class="center">2nd</th><th class="center">3rd</th>
+      <th class="center">4th</th><th class="center">5th</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td class="center">2</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>2</td><td class="center">3</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>3</td><td class="center">4</td><td class="center">2</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>4</td><td class="center">4</td><td class="center">3</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>5</td><td class="center">4</td><td class="center">3</td><td class="center">2</td><td class="center">—</td><td class="center">—</td></tr>
+    <tr><td>7</td><td class="center">4</td><td class="center">3</td><td class="center">3</td><td class="center">1</td><td class="center">—</td></tr>
+    <tr><td>9</td><td class="center">4</td><td class="center">3</td><td class="center">3</td><td class="center">3</td><td class="center">1</td></tr>
+  </tbody>
+</table>
+
+<p>The bot only needs rows 1–5 for a one-shot campaign. The full table goes to level 20 with slots up to 9th level, but that's out of scope for now.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> How Spells Resolve</h2>
+
+<p>Every spell uses one of two resolution paths — either the caster attacks or the target saves. The DM never gets to choose: it's specified in the spell's description.</p>
+
+<div class="resolution-grid">
+  <div class="res-card res-attack">
+    <div class="res-title">Spell Attack Roll</div>
+    Caster rolls d20 + spellcasting modifier + proficiency vs target AC. Works exactly like a weapon attack roll — critical hits apply (double damage dice on a natural 20).
+    <div class="formula" style="margin-top:0.6rem; font-size:0.82rem">d20 + spell mod + prof vs AC</div>
+    <em style="font-size:0.85rem">Examples: Fire Bolt, Eldritch Blast, Chromatic Orb</em>
+  </div>
+  <div class="res-card res-save">
+    <div class="res-title">Saving Throw</div>
+    Target rolls d20 + their save modifier vs the caster's Spell Save DC. On a success, the target usually takes half damage or suffers no effect (spell specifies which).
+    <div class="formula" style="margin-top:0.6rem; font-size:0.82rem">target: d20 + save mod vs DC<br>DC = 8 + prof + spell mod</div>
+    <em style="font-size:0.85rem">Examples: Fireball (DEX save), Hold Person (WIS save)</em>
+  </div>
+</div>
+
+<h3>The Spellcasting Modifier</h3>
+<p>Each class uses a different ability score for spellcasting — this affects both spell attack rolls and Spell Save DC:</p>
+
+<table>
+  <thead><tr><th>Class</th><th>Spellcasting Ability</th></tr></thead>
+  <tbody>
+    <tr><td>Wizard</td><td>Intelligence (INT)</td></tr>
+    <tr><td>Cleric, Druid</td><td>Wisdom (WIS)</td></tr>
+    <tr><td>Sorcerer, Bard, Warlock</td><td>Charisma (CHA)</td></tr>
+    <tr><td>Ranger, Paladin</td><td>Wisdom / Charisma respectively</td></tr>
+  </tbody>
+</table>
+
+<h3>Upcasting</h3>
+<p>A spell cast using a higher-level slot than its minimum is <em>upcast</em>. Most spells gain a bonus — typically more damage dice. The spell description always says what changes. <em>Magic Missile</em> at 1st level fires 3 darts; at 3rd level it fires 5. <em>Fireball</em> deals 8d6 at 3rd level and gains 1d6 per slot level above that.</p>
+
+<div class="bot-note">
+  <strong>What the bot must track per spellcaster:</strong><br>
+  spellcasting ability score &nbsp;&middot;&nbsp; proficiency bonus &nbsp;&middot;&nbsp; current slots per level [1–5] &nbsp;&middot;&nbsp; max slots per level &nbsp;&middot;&nbsp; concentration (currently active spell or nil)
+</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Concentration</h2>
+
+<p>Many powerful spells require the caster to maintain <em>concentration</em> — an ongoing mental effort that can be broken. You can only concentrate on one spell at a time. Casting a second concentration spell ends the first automatically, with no save.</p>
+
+<div class="conc-box">
+  <div class="conc-title">What breaks concentration</div>
+  <span class="conc-break">✗ Casting another concentration spell</span> — first spell ends immediately<br>
+  <span class="conc-break">✗ Taking damage</span> — CON saving throw (DC = 10 or half damage taken, whichever is higher)<br>
+  <span class="conc-break">✗ Being incapacitated or killed</span> — automatically broken<br>
+  <span class="conc-ok">✓ Taking other actions, moving, attacking</span> — concentration is maintained<br>
+  <span class="conc-ok">✓ Casting non-concentration spells</span> — fine, concentration continues
+</div>
+
+<h3>The Concentration Save</h3>
+
+<div class="formula">DC = max(10, damage_taken / 2)<br>Roll: d20 + CON modifier ≥ DC → concentration holds</div>
+
+<p>Example: a wizard concentrating on <em>Hold Person</em> takes 18 damage from a sword strike. The DC is max(10, 9) = 10. They roll d20 + CON modifier. Fail, and <em>Hold Person</em> ends immediately — the frozen target is freed.</p>
+
+<div class="callout">
+  <strong>BG3 note:</strong> every time an enemy attacks a concentrating character and you see a "Concentration Check" roll — that's this. The game runs it automatically. Your bot has to trigger it explicitly whenever a concentrating PC takes damage.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Bonus Action Spell Rule</h2>
+
+<p>This rule surprises almost everyone the first time. If you cast <em>any</em> spell as a bonus action on your turn, the only spell you can cast as your action is a cantrip — not a leveled spell, even if you have the slots.</p>
+
+<table>
+  <thead><tr><th>Bonus action spell?</th><th>What you can cast as your action</th></tr></thead>
+  <tbody>
+    <tr><td>No</td><td>Any spell (leveled or cantrip)</td></tr>
+    <tr><td>Yes (e.g. Healing Word)</td><td>Cantrips only</td></tr>
+  </tbody>
+</table>
+
+<p>The rationale: bonus action spells are fast (healing a downed ally, applying a buff). Letting casters pair them with a full action spell would be too powerful. The bot must enforce this constraint in the action validation layer.</p>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. A wizard (INT 18, proficiency +3) casts <em>Fireball</em> at a group of goblins. What is their Spell Save DC?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> fifteen</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> sixteen</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> seventeen</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> eighteen</label>
+    </div>
+    <button class="check-btn" onclick="check('q1','c','DC = 8 + proficiency + spellcasting modifier. INT 18 → modifier +4. 8 + 3 + 4 = 15... wait: INT 18 → modifier = ⌊(18−10)/2⌋ = 4. 8 + 3 + 4 = 15. Hmm — actually DC = 8 + 3 + 4 = 15. Let me recheck: the answer is 15, not 17. (Correct answer is A: fifteen.)')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. A cleric concentrating on <em>Bless</em> takes 14 damage. What is the Concentration save DC?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> seven</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> ten</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> fourteen</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> twenty</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','b','DC = max(10, damage/2) = max(10, 7) = 10. Half of 14 is 7, which is less than 10, so the floor kicks in. The DC is always at least 10.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A sorcerer casts <em>Healing Word</em> (a bonus action spell) to revive a downed ally. They still have their action. What can they cast with it?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> any leveled spell they know</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> cantrips only this turn</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> one more bonus action spell</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> nothing, action is used up</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','Casting any spell as a bonus action restricts your action spell to cantrips only for that turn. Healing Word + Fire Bolt is legal. Healing Word + Fireball is not.')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. A wizard is concentrating on <em>Hold Person</em> and casts <em>Fly</em> (also a concentration spell). What happens to <em>Hold Person</em>?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> both spells run simultaneously</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> it ends, no save required</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> it ends after a CON save fails</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> the caster chooses which ends</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','b','Casting a second concentration spell ends the first automatically — no save, no choice. You can only concentrate on one spell at a time.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://5e24srd.com/index.html">SRD 5.2</a> — search "Spellcasting" and read "Spell Slots", "Concentration", and "Casting a Spell." These three sections cover everything the bot needs.</p>
+  <p><strong>Reference &rarr;</strong> <a href="../reference/ability-scores.html">Ability Scores &amp; Modifiers</a> — spell attack rolls and save DCs use the same modifier table.</p>
+  <p><strong>Next &rarr;</strong> Lesson 08: Goroutines &amp; Channels — the Go concurrency model that powers concurrent sessions and the agent message loop.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0006-type-assertions.html">Lesson 06: Type Assertions</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about any edge cases — upcasting rules, half-casters (Paladin, Ranger), or how to model the slot table in Go.</p>
+</div>
+
+<script>
+  const answered = {};
+  // Q1 correct answer override — the math works out to 15 (answer a)
+  const correctAnswers = { q1: 'a', q2: 'b', q3: 'b', q4: 'b' };
+  const explanations = {
+    q1: 'DC = 8 + proficiency + spellcasting modifier. INT 18 → modifier +4. 8 + 3 + 4 = 15.',
+    q2: 'DC = max(10, damage/2) = max(10, 7) = 10. Half of 14 is 7, below the floor of 10.',
+    q3: 'Casting any spell as a bonus action restricts your action spell to cantrips only for that turn.',
+    q4: 'Casting a second concentration spell ends the first automatically — no save, no choice.',
+  };
+  function check(qid, _unused, _explanation) {
+    const correct = correctAnswers[qid];
+    const explanation = explanations[qid];
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answered[qid] = sel.value === correct;
+    fb.innerHTML = sel.value === correct
+      ? `<span class="ok">&#10003; Correct.</span> ${explanation}`
+      : `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Lesson 08 next: goroutines.' : score >= 3 ? 'Good — review what you missed.' : 'Reread the concentration and spell resolution sections.'}`;
+    }
+  }
+</script>
+</body>
+</html>

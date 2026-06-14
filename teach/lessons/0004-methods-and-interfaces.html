@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 04 — Methods &amp; Interfaces</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #faf9f7;
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; color: #222; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go     { background: #e8f0f3; color: #005580; }
+    .tag-dnd    { background: #f3e8e8; color: #8b0000; }
+    .tag-gotcha { background: #fff3e0; color: #7a4400; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.1rem 0; }
+    .compare > div { padding: 0.85rem 1rem; border-radius: 6px; }
+    .cmp-py { background: #1c2e44; }
+    .cmp-go { background: #1c2e1c; }
+    .cmp-label { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.4rem; }
+    .compare pre { margin: 0; background: none; padding: 0; font-size: 0.8rem; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .alert { background: #fff3e0; border-left: 3px solid #d97706; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .alert strong { color: #7a4400; }
+
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    .rx  { color: #9cdcfe; }   /* receiver */
+
+    /* Receiver diagram */
+    .receiver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.1rem 0; }
+    .receiver-card { border-radius: 6px; padding: 0.8rem 1rem; font-size: 0.9rem; line-height: 1.55; border: 1.5px solid #ddd; }
+    .receiver-card .rc-title { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+    .rc-value { border-color: #4a9e4a; }
+    .rc-value .rc-title { color: #2a6e2a; }
+    .rc-ptr { border-color: #8b0000; }
+    .rc-ptr .rc-title { color: #8b0000; }
+
+    /* Interface satisfaction diagram */
+    .iface-diagram { margin: 1.25rem 0; font-size: 0.9rem; }
+    .iface-box { border: 2px solid #005580; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.6rem; }
+    .iface-box .iface-title { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #005580; font-weight: 700; margin-bottom: 0.4rem; }
+    .impl-row { display: flex; gap: 0.6rem; }
+    .impl-box { flex: 1; border: 2px solid #2a6e2a; border-radius: 6px; padding: 0.6rem 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #1a1a1a; }
+    .impl-box .impl-title { color: #2a6e2a; font-weight: 700; margin-bottom: 0.25rem; }
+    .arrow { text-align: center; color: #888; font-size: 1.1rem; padding: 0.2rem 0; }
+
+    /* Quiz */
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+    sup a { color: #999; font-size: 0.7em; text-decoration: none; }
+    sup a:hover { color: #005580; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0004 &middot; Go</div>
+<h1>Methods &amp; Interfaces</h1>
+<p class="subtitle">How Go replaces class hierarchies — and how you'll define what the bot needs from any combatant, whether PC or monster.</p>
+
+<p>In Python, behavior lives inside a class. In Go, behavior is attached to a type via <em>methods</em>, and types are grouped by capability via <em>interfaces</em>. These two mechanisms replace inheritance entirely. By the end of this lesson you'll have a <code>Combatant</code> interface your bot can use to run combat without caring whether it's talking to a player character or a goblin.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Methods on Structs</h2>
+
+<p>A method is a function with a <strong>receiver</strong> — a type argument that comes before the function name. The receiver is what connects the function to the type:</p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>class CheckResult:
+    def is_critical(self) -> bool:
+        return self.roll == 20</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">func</span> (r <span class="rx">CheckResult</span>) <span class="fn">IsCritical</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> r.Roll == <span class="num">20</span>
+}</code></pre>
+  </div>
+</div>
+
+<p>The receiver <code>(r CheckResult)</code> sits between <code>func</code> and the method name. <code>r</code> is just a local name for the value — you'll commonly see single letters or short abbreviations. Call it like Python: <code>result.IsCritical()</code>.</p>
+
+<h3>Value vs Pointer Receivers</h3>
+
+<p>This is where Go diverges from Python most sharply. Receivers come in two forms:</p>
+
+<div class="receiver-grid">
+  <div class="receiver-card rc-value">
+    <div class="rc-title">Value receiver</div>
+    <code>(r CheckResult)</code><br><br>
+    Gets a <strong>copy</strong> of the struct. The original is untouched. Use when the method only reads state.
+  </div>
+  <div class="receiver-card rc-ptr">
+    <div class="rc-title">Pointer receiver</div>
+    <code>(r *CheckResult)</code><br><br>
+    Gets a <strong>pointer</strong> to the original. Can modify it. Use when the method mutates state, or when the struct is large enough that copying is wasteful.
+  </div>
+</div>
+
+<pre><code><span class="cmt">// Value receiver — reads only, gets a copy</span>
+<span class="kw">func</span> (r <span class="rx">CheckResult</span>) <span class="fn">IsCritical</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> r.Roll == <span class="num">20</span>
+}
+
+<span class="cmt">// Value receiver — formats for display</span>
+<span class="kw">func</span> (r <span class="rx">CheckResult</span>) <span class="fn">String</span>() <span class="typ">string</span> {
+    outcome := <span class="str">"miss"</span>
+    <span class="kw">if</span> r.Success {
+        outcome = <span class="str">"hit"</span>
+    }
+    <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"roll %d + %d = %d vs DC %d (%s)"</span>,
+        r.Roll, r.Modifier, r.Total, r.DC, outcome)
+}</code></pre>
+
+<div class="alert">
+  <strong>Consistency rule:</strong> if <em>any</em> method on a type uses a pointer receiver, all of them should. Mixing value and pointer receivers on the same type breaks interface satisfaction in subtle, confusing ways. Pick one and stick to it. For types that hold mutable state (like a combatant's HP), use pointer receivers throughout.
+</div>
+
+<h3>The <code>fmt.Stringer</code> Interface</h3>
+
+<p>The <code>String() string</code> method above is not arbitrary — it satisfies <code>fmt.Stringer</code>, a standard library interface. Any type with a <code>String() string</code> method will automatically be formatted by <code>fmt.Println</code>, <code>fmt.Sprintf</code>, and friends using that method. You didn't register anything; the compiler figured it out.</p>
+
+<pre><code>result, _ := dice.<span class="fn">AbilityCheck</span>(<span class="num">14</span>, <span class="num">15</span>)
+fmt.<span class="fn">Println</span>(result)  <span class="cmt">// → "roll 9 + 2 = 11 vs DC 15 (miss)"</span></code></pre>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Interfaces</h2>
+
+<p>An interface is a named set of method signatures. Any type that has all those methods <em>automatically</em> satisfies the interface — no declaration, no registration, no <code>implements</code> keyword.<sup><a href="https://go.dev/tour/methods/9">[Tour of Go]</a></sup></p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python (explicit)</div>
+    <pre><code>from abc import ABC, abstractmethod
+
+class Combatant(ABC):
+    @abstractmethod
+    def name(self) -> str: ...
+    @abstractmethod
+    def current_hp(self) -> int: ...</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go (implicit)</div>
+    <pre><code><span class="kw">type</span> <span class="typ">Combatant</span> <span class="kw">interface</span> {
+    <span class="fn">Name</span>()      <span class="typ">string</span>
+    <span class="fn">CurrentHP</span>() <span class="typ">int</span>
+}</code></pre>
+  </div>
+</div>
+
+<p>Any type with <code>Name() string</code> and <code>CurrentHP() int</code> methods satisfies <code>Combatant</code> — even types defined in packages that have never heard of this interface. This is called <strong>structural typing</strong>. It's what makes Go interfaces composable without coupling.</p>
+
+<h3>The Combatant Interface for Our Bot</h3>
+
+<p>Based on what the bot must track (from lesson 3), here's the interface that both player characters and monsters need to satisfy:</p>
+
+<pre><code><span class="cmt">// Combatant is anything that can participate in D&D 5e combat.</span>
+<span class="kw">type</span> <span class="typ">Combatant</span> <span class="kw">interface</span> {
+    <span class="fn">Name</span>()           <span class="typ">string</span>
+    <span class="fn">CurrentHP</span>()      <span class="typ">int</span>
+    <span class="fn">MaxHP</span>()          <span class="typ">int</span>
+    <span class="fn">AC</span>()             <span class="typ">int</span>
+    <span class="fn">InitiativeBonus</span>() <span class="typ">int</span>   <span class="cmt">// DEX modifier</span>
+    <span class="fn">IsAlive</span>()        <span class="typ">bool</span>
+    <span class="fn">TakeDamage</span>(amount <span class="typ">int</span>)
+}</code></pre>
+
+<h3>Two Types, One Interface</h3>
+
+<p>Now define two concrete types. Neither mentions <code>Combatant</code>. The compiler will verify satisfaction at the point of use:</p>
+
+<pre><code><span class="kw">type</span> <span class="typ">Monster</span> <span class="kw">struct</span> {
+    name      <span class="typ">string</span>
+    currentHP <span class="typ">int</span>
+    maxHP     <span class="typ">int</span>
+    ac        <span class="typ">int</span>
+    dexMod    <span class="typ">int</span>
+}
+
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">Name</span>()            <span class="typ">string</span> { <span class="kw">return</span> m.name }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">CurrentHP</span>()       <span class="typ">int</span>    { <span class="kw">return</span> m.currentHP }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">MaxHP</span>()           <span class="typ">int</span>    { <span class="kw">return</span> m.maxHP }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">AC</span>()              <span class="typ">int</span>    { <span class="kw">return</span> m.ac }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">InitiativeBonus</span>() <span class="typ">int</span>    { <span class="kw">return</span> m.dexMod }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">IsAlive</span>()         <span class="typ">bool</span>   { <span class="kw">return</span> m.currentHP > <span class="num">0</span> }
+<span class="kw">func</span> (m *<span class="rx">Monster</span>) <span class="fn">TakeDamage</span>(amount <span class="typ">int</span>) {
+    m.currentHP -= amount
+    <span class="kw">if</span> m.currentHP < <span class="num">0</span> {
+        m.currentHP = <span class="num">0</span>
+    }
+}</code></pre>
+
+<p>A <code>PlayerCharacter</code> type would look similar but include death save tracking. The combat engine doesn't need to know which it's dealing with:</p>
+
+<pre><code><span class="cmt">// The engine works on the interface. Monster and PlayerCharacter
+// can be mixed freely in the same slice.</span>
+<span class="kw">func</span> <span class="fn">RunInitiative</span>(combatants []<span class="typ">Combatant</span>) {
+    <span class="kw">for</span> _, c := <span class="kw">range</span> combatants {
+        roll, _ := dice.<span class="fn">Roll</span>(<span class="num">20</span>)
+        score := roll + c.<span class="fn">InitiativeBonus</span>()
+        fmt.<span class="fn">Printf</span>(<span class="str">"%s rolls initiative: %d\n"</span>, c.<span class="fn">Name</span>(), score)
+    }
+}</code></pre>
+
+<div class="callout">
+  <strong>The design insight:</strong> the interface is defined by the <em>consumer</em> (the combat engine), not by the types that satisfy it. <code>Monster</code> doesn't know it satisfies <code>Combatant</code>. This is the opposite of Python's ABC pattern, and it means you can make any existing type satisfy a new interface without touching it.
+</div>
+
+<h3><span class="tag tag-gotcha">Gotcha</span> Pointer Receivers and Interface Satisfaction</h3>
+
+<p>This is the most common interface mistake in Go. If a method is defined on <code>*Monster</code> (pointer receiver), then <code>*Monster</code> satisfies the interface — but plain <code>Monster</code> does not:</p>
+
+<pre><code><span class="kw">var</span> c <span class="typ">Combatant</span>
+
+goblin := <span class="typ">Monster</span>{name: <span class="str">"Goblin"</span>, currentHP: <span class="num">7</span>, maxHP: <span class="num">7</span>, ac: <span class="num">15</span>}
+
+c = &amp;goblin  <span class="cmt">// ✓ *Monster satisfies Combatant</span>
+c = goblin   <span class="cmt">// ✗ Monster does not — compile error</span></code></pre>
+
+<p>The rule: <strong>pointer to type satisfies interfaces defined with pointer receivers; value of type does not.</strong> If you see a compile error like <em>"Monster does not implement Combatant (TakeDamage method has pointer receiver)"</em>, this is why. Use <code>&amp;goblin</code>.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D</span> <span class="tag tag-go">Go</span> What to Build Next</h2>
+
+<p>You now have the vocabulary to build the combat engine skeleton. The path from here:</p>
+
+<ol style="margin: 0.75rem 0 1rem 1.5rem; line-height: 2;">
+  <li>Define <code>Combatant</code> in <code>pkg/combat/combatant.go</code></li>
+  <li>Implement <code>Monster</code> in the same package</li>
+  <li>Implement <code>PlayerCharacter</code> with death save tracking</li>
+  <li>Write <code>RunInitiative([]Combatant)</code> — sorts by initiative score</li>
+  <li>Write <code>ResolveAttack(attacker, target Combatant)</code> — uses your dice package</li>
+</ol>
+
+<p>The dice package you already wrote slots directly into step 5. <code>AbilityCheck</code> handles ability checks; you'll need a separate <code>AttackRoll</code> function that takes proficiency bonus and compares to AC.</p>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. A <code>Monster</code> type has all its methods defined with pointer receivers. Which of these correctly assigns a Monster to a <code>Combatant</code> variable?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> <code>var c Combatant = Monster{...}</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> <code>var c Combatant = &amp;Monster{...}</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> <code>var c *Combatant = Monster{...}</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> <code>var c *Combatant = &amp;Monster{...}</code></label>
+    </div>
+    <button class="check-btn" onclick="check('q1','b','Pointer receivers mean *Monster satisfies the interface, not Monster. You need &amp;Monster{...} to get a *Monster. Combatant is an interface, not a struct — you don\'t take a pointer to it.')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. In Go, how does a type declare that it implements an interface?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> it uses implements keyword</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> it embeds the interface</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> it just has the methods</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> it calls Register method</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','c','Implicit satisfaction — if the type has all the methods the interface requires, it satisfies it. No declaration, no registration, no keyword.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. You want a method on <code>Monster</code> to reduce its HP. Should the receiver be a value or pointer receiver, and why?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> value, copies are safer</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> pointer, to mutate state</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> value, HP is an integer</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> pointer, interfaces need it</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','A value receiver gets a copy — changes to it don\'t affect the original. To actually reduce the Monster\'s HP you need a pointer receiver so you\'re modifying the original struct.')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. What standard library interface does a type satisfy by implementing <code>String() string</code>?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> fmt.Formatter</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> io.Writer</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> fmt.Stringer</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> encoding.TextMarshaler</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','c','fmt.Stringer has exactly one method: String() string. Satisfy it and fmt.Println, fmt.Sprintf, and friends will use your method automatically.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://go.dev/tour/methods/9">A Tour of Go — Interfaces</a>. The sections on implicit implementation, the empty interface, and type assertions are all worth reading now.</p>
+  <p><strong>Next &rarr;</strong> Build <code>pkg/combat/</code> — implement <code>Combatant</code>, <code>Monster</code>, and <code>ResolveAttack</code> using what you've learned across all four lessons.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0003-combat-and-action-economy.html">Lesson 03: Combat &amp; Action Economy</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">If the pointer/interface distinction is still fuzzy after the quiz, ask your agent — it trips up almost every Python developer the first time.</p>
+</div>
+
+<script>
+  const answered = {};
+  function check(qid, correct, explanation) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answered[qid] = sel.value === correct;
+    fb.innerHTML = sel.value === correct
+      ? `<span class="ok">&#10003; Correct.</span> ${explanation}`
+      : `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Go build pkg/combat/.' : score >= 3 ? 'Good — review what you missed, especially the pointer receiver gotcha.' : 'Reread the pointer receiver and interface sections before building combat.'}`;
+    }
+  }
+</script>
+</body>
+</html>

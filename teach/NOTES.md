@@ -10,6 +10,8 @@
 - Frame Go idioms against Python — show the delta, not from zero
 - Dual-track: Go concepts + D&D 5e rules, tied to the bot project
 - Systems design (caching, concurrency, scaling) is an explicit goal — surface tradeoffs, don't hide them
+- **TDD is preferred workflow** — write failing tests first, then implement. Bake red→green into every lesson that introduces new code. Don't leave tests as a post-lesson exercise.
+- When test setups use structs, explicitly call out which fields need non-zero values — zero-value bugs (maxHP=0, damageDie=0) caused real test failures and needed teacher intervention.
 
 ## D&D 5e Experience
 - Has played BG3 significantly — knows action economy, combat loop, ability checks at an intuitive level

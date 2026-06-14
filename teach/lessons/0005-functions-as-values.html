@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 05 — Functions as Values</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; color: #222; }
+    p { margin-bottom: 1rem; }
+    ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go     { background: #e8f0f3; color: #005580; }
+    .tag-dnd    { background: #f3e8e8; color: #8b0000; }
+    .tag-tdd    { background: #e8f3e8; color: #1a5c1a; }
+    .tag-gotcha { background: #fff3e0; color: #7a4400; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.1rem 0; }
+    .compare > div { padding: 0.85rem 1rem; border-radius: 6px; }
+    .cmp-py { background: #1c2e44; }
+    .cmp-go { background: #1c2e1c; }
+    .cmp-label { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.4rem; }
+    .compare pre { margin: 0; background: none; padding: 0; font-size: 0.8rem; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .tdd-box { background: #f0f7f0; border-left: 3px solid #2a6e2a; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .tdd-box strong { color: #1a5c1a; }
+    .fail-box { background: #1e1e1e; color: #f85149; padding: 0.85rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.6; }
+    .pass-box { background: #1e1e1e; color: #3fb950; padding: 0.85rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.6; }
+
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    .rx  { color: #9cdcfe; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+    sup a { color: #999; font-size: 0.7em; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0005 &middot; Go</div>
+<h1>Functions as Values</h1>
+<p class="subtitle">Fixing <code>RunInitiative</code> the TDD way — and learning how Go treats functions as first-class citizens.</p>
+
+<p><code>RunInitiative</code> currently just prints. The combat engine needs it to <em>return</em> combatants in initiative order — highest score first, ties broken by DEX modifier. We'll build this the right way: test first.</p>
+
+<hr>
+
+<h2><span class="tag tag-tdd">TDD</span> Write the Test First</h2>
+
+<p>Before touching the implementation, write the test that defines what "sorted initiative" means. This test will fail immediately — that's the point.</p>
+
+<p>Add this to <code>pkg/combat/combatant_test.go</code>:</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">TestRollInitiative</span>(t *testing.<span class="typ">T</span>) {
+    combatants := []<span class="typ">Combatant</span>{
+        &<span class="typ">Monster</span>{name: <span class="str">"Goblin"</span>, currentHP: <span class="num">7</span>, maxHP: <span class="num">7</span>, ac: <span class="num">15</span>, dexMod: <span class="num">2</span>},
+        &<span class="typ">Monster</span>{name: <span class="str">"Ogre"</span>, currentHP: <span class="num">59</span>, maxHP: <span class="num">59</span>, ac: <span class="num">11</span>, dexMod: <span class="num">-1</span>},
+        &<span class="typ">PlayerCharacter</span>{name: <span class="str">"Aria"</span>, currentHP: <span class="num">28</span>, maxHP: <span class="num">28</span>, ac: <span class="num">16</span>, dexMod: <span class="num">3</span>},
+    }
+
+    ordered := <span class="fn">RollInitiative</span>(combatants)
+
+    <span class="kw">if</span> len(ordered) != len(combatants) {
+        t.<span class="fn">Fatalf</span>(<span class="str">"got %d entries, want %d"</span>, len(ordered), len(combatants))
+    }
+    <span class="kw">for</span> i := <span class="num">1</span>; i < len(ordered); i++ {
+        <span class="kw">if</span> ordered[i].Score > ordered[i-<span class="num">1</span>].Score {
+            t.<span class="fn">Errorf</span>(<span class="str">"not sorted: index %d (score %d) > index %d (score %d)"</span>,
+                i, ordered[i].Score, i-<span class="num">1</span>, ordered[i-<span class="num">1</span>].Score)
+        }
+    }
+}</code></pre>
+
+<div class="fail-box">$ go test ./pkg/combat/ -run TestRollInitiative
+./combatant_test.go:XX:18: undefined: RollInitiative
+FAIL	github.com/tjlsmith0831/dnd-go-agent/pkg/combat [build failed]</div>
+
+<p>Good. The test tells us exactly what to build: a function <code>RollInitiative</code> that returns a slice of something with a <code>Score</code> field, sorted descending. Now we can implement.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Functions as First-Class Values</h2>
+
+<p>In Go, functions are values. You can assign them to variables, pass them as arguments, and return them from other functions — exactly like Python.<sup><a href="https://go.dev/tour/moretypes/24">[Tour of Go]</a></sup></p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>def double(x):
+    return x * 2
+
+apply = double
+apply(5)  # → 10
+
+def run(fn, x):
+    return fn(x)
+
+run(double, 5)  # → 10</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">func</span> <span class="fn">double</span>(x <span class="typ">int</span>) <span class="typ">int</span> { <span class="kw">return</span> x * <span class="num">2</span> }
+
+apply := double
+<span class="fn">apply</span>(<span class="num">5</span>)  <span class="cmt">// → 10</span>
+
+<span class="kw">func</span> <span class="fn">run</span>(fn <span class="kw">func</span>(<span class="typ">int</span>) <span class="typ">int</span>, x <span class="typ">int</span>) <span class="typ">int</span> {
+    <span class="kw">return</span> <span class="fn">fn</span>(x)
+}
+
+<span class="fn">run</span>(double, <span class="num">5</span>)  <span class="cmt">// → 10</span></code></pre>
+  </div>
+</div>
+
+<p>The type of a function is written as <code>func(paramTypes) returnType</code>. A function that takes an <code>int</code> and returns an <code>int</code> has type <code>func(int) int</code>. A function that takes two <code>int</code>s and returns a <code>bool</code> has type <code>func(int, int) bool</code>.</p>
+
+<h3>Closures</h3>
+
+<p>A closure is a function that captures variables from the scope where it was defined — not passed in as arguments, just referenced directly:</p>
+
+<div class="compare">
+  <div class="cmp-py">
+    <div class="cmp-label">Python</div>
+    <pre><code>def make_adder(n):
+    def add(x):
+        return x + n  # closes over n
+    return add
+
+add5 = make_adder(5)
+add5(3)  # → 8</code></pre>
+  </div>
+  <div class="cmp-go">
+    <div class="cmp-label">Go</div>
+    <pre><code><span class="kw">func</span> <span class="fn">makeAdder</span>(n <span class="typ">int</span>) <span class="kw">func</span>(<span class="typ">int</span>) <span class="typ">int</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(x <span class="typ">int</span>) <span class="typ">int</span> {
+        <span class="kw">return</span> x + n  <span class="cmt">// closes over n</span>
+    }
+}
+
+add5 := <span class="fn">makeAdder</span>(<span class="num">5</span>)
+<span class="fn">add5</span>(<span class="num">3</span>)  <span class="cmt">// → 8</span></code></pre>
+  </div>
+</div>
+
+<p>The anonymous function inside <code>makeAdder</code> captures <code>n</code> from its surrounding scope. That captured variable lives as long as the closure does, even after <code>makeAdder</code> returns. You'll use this constantly with <code>sort.Slice</code>.</p>
+
+<h3><code>sort.Slice</code></h3>
+
+<p>The standard library's <code>sort.Slice</code> takes a slice and a <strong>less function</strong> — a closure that tells it how to compare two elements by index:</p>
+
+<pre><code><span class="kw">import</span> <span class="str">"sort"</span>
+
+scores := []<span class="typ">int</span>{<span class="num">4</span>, <span class="num">12</span>, <span class="num">7</span>, <span class="num">19</span>, <span class="num">3</span>}
+
+<span class="cmt">// Sort ascending</span>
+sort.<span class="fn">Slice</span>(scores, <span class="kw">func</span>(i, j <span class="typ">int</span>) <span class="typ">bool</span> {
+    <span class="kw">return</span> scores[i] < scores[j]
+})
+<span class="cmt">// scores → [3, 4, 7, 12, 19]</span>
+
+<span class="cmt">// Sort descending — flip the comparison</span>
+sort.<span class="fn">Slice</span>(scores, <span class="kw">func</span>(i, j <span class="typ">int</span>) <span class="typ">bool</span> {
+    <span class="kw">return</span> scores[i] > scores[j]
+})
+<span class="cmt">// scores → [19, 12, 7, 4, 3]</span></code></pre>
+
+<p>The closure closes over <code>scores</code> — it references the slice directly rather than receiving it as an argument. <code>sort.Slice</code> only calls the function with indices; the closure handles the rest.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> <span class="tag tag-dnd">D&amp;D</span> Implementing <code>RollInitiative</code></h2>
+
+<p>The function needs a return type. A combatant's initiative score isn't part of the <code>Combatant</code> interface — it's the result of a die roll that happens once at the start of combat. A small struct holds both together:</p>
+
+<pre><code><span class="cmt">// InitiativeEntry pairs a combatant with their rolled initiative score.</span>
+<span class="kw">type</span> <span class="typ">InitiativeEntry</span> <span class="kw">struct</span> {
+    Combatant <span class="typ">Combatant</span>
+    Score     <span class="typ">int</span>
+}</code></pre>
+
+<p>Now the function: roll for each combatant, build the slice, sort it descending.</p>
+
+<pre><code><span class="cmt">// RollInitiative rolls initiative for all combatants and returns them</span>
+<span class="cmt">// sorted from highest score to lowest.</span>
+<span class="kw">func</span> <span class="fn">RollInitiative</span>(combatants []<span class="typ">Combatant</span>) ([]<span class="typ">InitiativeEntry</span>, <span class="typ">error</span>) {
+    entries := <span class="fn">make</span>([]<span class="typ">InitiativeEntry</span>, len(combatants))
+
+    <span class="kw">for</span> i, c := <span class="kw">range</span> combatants {
+        roll, err := dice.<span class="fn">Roll</span>(<span class="num">20</span>)
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            <span class="kw">return</span> <span class="kw">nil</span>, err
+        }
+        entries[i] = <span class="typ">InitiativeEntry</span>{
+            Combatant: c,
+            Score:     roll + c.<span class="fn">InitiativeBonus</span>(),
+        }
+    }
+
+    sort.<span class="fn">Slice</span>(entries, <span class="kw">func</span>(i, j <span class="typ">int</span>) <span class="typ">bool</span> {
+        <span class="kw">return</span> entries[i].Score > entries[j].Score  <span class="cmt">// descending</span>
+    })
+
+    <span class="kw">return</span> entries, <span class="kw">nil</span>
+}</code></pre>
+
+<div class="callout">
+  <strong>New built-in: <code>make</code></strong><br>
+  <code>make([]InitiativeEntry, len(combatants))</code> allocates a slice of a specific length, with all elements zero-valued. It's the idiomatic way to pre-allocate a slice when you know the size upfront — more efficient than starting empty and appending. <code>make</code> works on slices, maps, and channels; it's not for structs or arrays.
+</div>
+
+<p>Now update the test to match the new signature (it returns an error too):</p>
+
+<pre><code><span class="kw">func</span> <span class="fn">TestRollInitiative</span>(t *testing.<span class="typ">T</span>) {
+    combatants := []<span class="typ">Combatant</span>{
+        &<span class="typ">Monster</span>{name: <span class="str">"Goblin"</span>, currentHP: <span class="num">7</span>, maxHP: <span class="num">7</span>, ac: <span class="num">15</span>, dexMod: <span class="num">2</span>},
+        &<span class="typ">Monster</span>{name: <span class="str">"Ogre"</span>, currentHP: <span class="num">59</span>, maxHP: <span class="num">59</span>, ac: <span class="num">11</span>, dexMod: <span class="num">-1</span>},
+        &<span class="typ">PlayerCharacter</span>{name: <span class="str">"Aria"</span>, currentHP: <span class="num">28</span>, maxHP: <span class="num">28</span>, ac: <span class="num">16</span>, dexMod: <span class="num">3</span>},
+    }
+
+    ordered, err := <span class="fn">RollInitiative</span>(combatants)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        t.<span class="fn">Fatalf</span>(<span class="str">"unexpected error: %v"</span>, err)
+    }
+    <span class="kw">if</span> len(ordered) != len(combatants) {
+        t.<span class="fn">Fatalf</span>(<span class="str">"got %d entries, want %d"</span>, len(ordered), len(combatants))
+    }
+    <span class="kw">for</span> i := <span class="num">1</span>; i < len(ordered); i++ {
+        <span class="kw">if</span> ordered[i].Score > ordered[i-<span class="num">1</span>].Score {
+            t.<span class="fn">Errorf</span>(<span class="str">"not sorted at index %d: score %d > previous score %d"</span>,
+                i, ordered[i].Score, ordered[i-<span class="num">1</span>].Score)
+        }
+    }
+}</code></pre>
+
+<div class="pass-box">$ go test ./pkg/combat/ -run TestRollInitiative
+ok  	github.com/tjlsmith0831/dnd-go-agent/pkg/combat	0.002s</div>
+
+<h3><span class="tag tag-gotcha">Gotcha</span> Closures Capture Variables, Not Values</h3>
+
+<p>The most common closure mistake in Go — especially in loops. This prints 3, 3, 3 instead of 1, 2, 3:</p>
+
+<pre><code><span class="cmt">// WRONG: all closures capture the same i variable</span>
+funcs := []<span class="kw">func</span>(){}
+<span class="kw">for</span> i := <span class="num">1</span>; i <= <span class="num">3</span>; i++ {
+    funcs = <span class="fn">append</span>(funcs, <span class="kw">func</span>() { fmt.<span class="fn">Println</span>(i) })
+}
+<span class="kw">for</span> _, f := <span class="kw">range</span> funcs { <span class="fn">f</span>() }  <span class="cmt">// prints 4, 4, 4 (i's final value)</span>
+
+<span class="cmt">// RIGHT: capture the value by shadowing i in the inner scope</span>
+<span class="kw">for</span> i := <span class="num">1</span>; i <= <span class="num">3</span>; i++ {
+    i := i  <span class="cmt">// new variable shadows the loop variable</span>
+    funcs = <span class="fn">append</span>(funcs, <span class="kw">func</span>() { fmt.<span class="fn">Println</span>(i) })
+}
+<span class="cmt">// prints 1, 2, 3</span></code></pre>
+
+<p>Go 1.22+ (which you're on) fixed this for <code>for</code> loop variables specifically — each iteration gets its own copy of <code>i</code>. But the pattern appears in other contexts too. Know it.</p>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. What is the type of a function that takes two <code>int</code>s and returns a <code>bool</code>?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> <code>func(int, int) → bool</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> <code>func(int, int) bool</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> <code>(int, int) =&gt; bool</code></label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> <code>Func[int, int, bool]</code></label>
+    </div>
+    <button class="check-btn" onclick="check('q1','b','Go function types are written as func(paramTypes) returnType — no arrow, no brackets. func(int, int) bool is the exact syntax.')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. <code>sort.Slice</code> takes a less function <code>func(i, j int) bool</code>. To sort a slice of <code>InitiativeEntry</code> highest-first, the less function should return…</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> entries[i].Score &lt; entries[j].Score</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> entries[i].Score &gt; entries[j].Score</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> entries[i].Score == entries[j].Score</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> entries[j].Score - entries[i].Score</label>
+    </div>
+    <button class="check-btn" onclick="check('q2','b','The less function returns true when element i should come before element j. For descending order, i comes first when its score is greater.')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A closure is defined inside a function that has a local variable <code>bonus := 5</code>. The closure uses <code>bonus</code> without receiving it as a parameter. When does <code>bonus</code> get evaluated?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> when the closure is defined</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> when the closure is called</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> when the outer function returns</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> when bonus is first assigned</label>
+    </div>
+    <button class="check-btn" onclick="check('q3','b','Closures capture a reference to the variable, not a snapshot of its value. bonus is read when the closure executes, not when it\'s created. If bonus changes between definition and call, the closure sees the new value.')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. What does <code>make([]InitiativeEntry, n)</code> do that <code>[]InitiativeEntry{}</code> does not?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> makes the slice immutable</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> pre-allocates n zero-valued slots</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> registers the slice with GC</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> initializes the slice to nil</label>
+    </div>
+    <button class="check-btn" onclick="check('q4','b','make([]T, n) creates a slice of length n with all elements zero-valued — you can index into it immediately. []T{} creates an empty slice of length 0; you must append to grow it.')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://go.dev/tour/moretypes/24">A Tour of Go — Function closures</a>. Also read the <a href="https://pkg.go.dev/sort#Slice">sort.Slice docs</a> — the signature tells you exactly what the less function must look like.</p>
+  <p><strong>Your task &rarr;</strong> Add <code>RollInitiative</code> and <code>InitiativeEntry</code> to <code>pkg/combat/combatant.go</code>, write the test first (red), then implement (green). You can delete or replace the old <code>RunInitiative</code>.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0004-methods-and-interfaces.html">Lesson 04: Methods &amp; Interfaces</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent if the closure gotcha or the <code>make</code> vs literal distinction is still fuzzy.</p>
+</div>
+
+<script>
+  const answered = {};
+  function check(qid, correct, explanation) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answered[qid] = sel.value === correct;
+    fb.innerHTML = sel.value === correct
+      ? `<span class="ok">&#10003; Correct.</span> ${explanation}`
+      : `<span class="no">&#10007; Not quite.</span> ${explanation}`;
+    if (Object.keys(answered).length === 4) {
+      const score = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Go write the test, then implement RollInitiative.' : score >= 3 ? 'Good — review what you missed before coding.' : 'Reread the closures and sort.Slice sections before implementing.'}`;
+    }
+  }
+</script>
+</body>
+</html>
