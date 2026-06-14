@@ -40,6 +40,17 @@ For each task, state a short plan with verification steps, e.g.:
 2. Wire Slack /quest command -> verify: manual message round-trip in test workspace
 ```
 
+## Git Commits
+
+Split commits by authorship:
+
+- **User wrote it** (Go source, go.mod, go.sum, main.go): commit with no co-author.
+- **Claude wrote it** (lessons `teach/lessons/*.html`, learning records `teach/learning-records/*.md`, CLAUDE.md changes): commit with `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`.
+
+## Security
+
+**Never read `.env` files.** They may contain API keys and secrets. If context about environment variables is needed, ask the user to describe them — never open the file.
+
 ## Project Specifics
 
 - **Language:** Go (learning goal: idiomatic concurrency, interfaces, error handling) and DnD 5e rules

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 09 — Context &amp; the LLM Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go  { background: #e8f3e8; color: #004d00; }
+    .tag-bot { background: #e8eaf3; color: #1a1a8b; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .op  { color: #d4d4d4; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+    .alert { background: #fdf0f0; border-left: 3px solid #8b0000; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .alert strong { color: #8b0000; }
+
+    .tdd-step { border: 1.5px solid #ddd; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .tdd-header { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; font-weight: 700; }
+    .tdd-red   .tdd-header { background: #fdf0f0; color: #8b0000; border-bottom: 1.5px solid #f5c2c2; }
+    .tdd-green .tdd-header { background: #f0fdf0; color: #1a5c1a; border-bottom: 1.5px solid #b8e0b8; }
+    .tdd-step pre { margin: 0; border-radius: 0; }
+
+    .flow { background: #1e1e1e; color: #d4d4d4; padding: 1rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 2; }
+    .flow-label { color: #6a9955; font-style: italic; }
+    .flow-arrow { color: #569cd6; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0009 &middot; Go</div>
+<h1>Context &amp; the LLM Interface</h1>
+<p class="subtitle">Upgrade <code>pkg/session</code> from an echo loop to a real agent: wire in <code>context.Context</code> for cancellation and an <code>LLMClient</code> interface for the language model.</p>
+
+<p>Your session goroutine echoes messages. That's the right skeleton — but two things are missing. First, the <code>done</code> channel pattern you wrote is real Go, but Go's standard library has a better abstraction for the same idea: <code>context.Context</code>. Second, <code>Run</code> doesn't do anything with messages yet — it needs to call an LLM and send the response back. This lesson adds both.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> context.Context</h2>
+
+<p><code>context.Context</code> is an interface in the standard library that carries three things across API boundaries: a <strong>cancellation signal</strong>, an optional <strong>deadline</strong>, and optional <strong>key-value pairs</strong>. It's how Go propagates "stop what you're doing" from a top-level handler all the way down through every function it calls.</p>
+
+<p>You'll see it as the first parameter of almost every function in Go that does I/O:</p>
+
+<pre><span class="kw">func</span> <span class="fn">Run</span>(ctx <span class="typ">context.Context</span>, ...) {}
+<span class="kw">func</span> <span class="fn">QueryDB</span>(ctx <span class="typ">context.Context</span>, ...) {}
+<span class="kw">func</span> <span class="fn">Complete</span>(ctx <span class="typ">context.Context</span>, ...) {}</pre>
+
+<p>First parameter, always. It's a Go convention, not a compiler requirement — but the entire ecosystem follows it so consistently that violating it feels wrong immediately.</p>
+
+<h3>Creating a context</h3>
+
+<pre><span class="cmt">// Background: the root context. Used in main or top-level tests.</span>
+ctx <span class="op">:=</span> context.<span class="fn">Background</span>()
+
+<span class="cmt">// WithCancel: derive a child context with a cancel function.</span>
+ctx, cancel <span class="op">:=</span> context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+<span class="kw">defer</span> <span class="fn">cancel</span>() <span class="cmt">// always call cancel — releases resources</span></pre>
+
+<p><code>context.WithCancel</code> returns two values: a new context derived from the parent, and a <code>cancel</code> function. Calling <code>cancel()</code> closes <code>ctx.Done()</code> — a <code>&lt;-chan struct{}</code>. Sound familiar? It's the same done-channel pattern you wrote in Lesson 8, standardised.</p>
+
+<div class="callout">
+  <strong>Your done channel, upgraded:</strong><br>
+  <code>done &lt;-chan struct{}</code> is the primitive. <code>context.Context</code> is the abstraction built on top of it. Both work — but <code>context.Context</code> composes better. If <code>Run</code> calls another function that takes a context, cancellation propagates automatically. With a raw <code>done</code> channel you'd have to thread it through manually.
+</div>
+
+<h3>Listening for cancellation</h3>
+
+<p><code>ctx.Done()</code> replaces <code>done</code> in your select:</p>
+
+<pre><span class="kw">select</span> {
+<span class="kw">case</span> msg <span class="op">:=</span> <span class="op">&lt;-</span>in:
+    <span class="cmt">// handle message</span>
+<span class="kw">case</span> <span class="op">&lt;-</span>ctx.<span class="fn">Done</span>():
+    <span class="kw">return</span> <span class="cmt">// context cancelled — clean exit</span>
+}</pre>
+
+<h3>Passing context into blocking calls</h3>
+
+<p>When you call the Anthropic API, the HTTP request might take seconds. Passing <code>ctx</code> into the SDK call means a cancelled context aborts the in-flight request — you don't leak a goroutine waiting on a network call that no longer matters:</p>
+
+<pre>response, err <span class="op">:=</span> llm.<span class="fn">Complete</span>(ctx, msg) <span class="cmt">// ctx cancels the HTTP call if the session ends</span></pre>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> The LLMClient Interface</h2>
+
+<p>You've seen this pattern before: <code>Combatant</code> was defined in <code>pkg/combat</code>, not by <code>Monster</code> or <code>PlayerCharacter</code>. The consumer owns the interface. Same here: <code>pkg/session</code> defines what it needs from a language model. The Anthropic SDK is one concrete implementation — but a stub works fine in tests, and you could swap in a different provider later without touching <code>Run</code>.</p>
+
+<pre><span class="cmt">// In pkg/session/session.go — the consumer defines the interface it needs.</span>
+<span class="kw">type</span> <span class="typ">LLMClient</span> <span class="kw">interface</span> {
+    <span class="fn">Complete</span>(ctx <span class="typ">context.Context</span>, prompt <span class="typ">string</span>) (<span class="typ">string</span>, <span class="typ">error</span>)
+}</pre>
+
+<p>One method. That's all <code>Run</code> needs to know. The interface is small on purpose — <em>interface pollution</em> is a real Go smell, where interfaces grow to mirror the concrete type instead of expressing what the caller actually uses.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> TDD: Wire It Up</h2>
+
+<p>Rewrite <code>pkg/session/session_test.go</code> first — define a stub and update the test to assert the LLM's response comes through. This won't compile until you update <code>session.go</code>.</p>
+
+<div class="tdd-step tdd-red">
+  <div class="tdd-header">Red — test that doesn't compile yet</div>
+<pre><span class="kw">package</span> session
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"testing"</span>
+)
+
+<span class="kw">type</span> <span class="typ">stubLLM</span> <span class="kw">struct</span>{}
+
+<span class="kw">func</span> (s <span class="typ">stubLLM</span>) <span class="fn">Complete</span>(_ <span class="typ">context.Context</span>, _ <span class="typ">string</span>) (<span class="typ">string</span>, <span class="typ">error</span>) {
+    <span class="kw">return</span> <span class="str">"You swing and miss."</span>, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">TestRun</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    in  <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="typ">string</span>)
+    out <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="typ">string</span>)
+    ctx, cancel <span class="op">:=</span> context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+
+    <span class="kw">go</span> <span class="fn">Run</span>(ctx, in, out, <span class="typ">stubLLM</span>{})
+
+    in <span class="op">&lt;-</span> <span class="str">"attack goblin"</span>
+    got <span class="op">:=</span> <span class="op">&lt;-</span>out
+    <span class="kw">if</span> got <span class="op">!=</span> <span class="str">"You swing and miss."</span> {
+        t.<span class="fn">Errorf</span>(<span class="str">"got %q, want %q"</span>, got, <span class="str">"You swing and miss."</span>)
+    }
+}</pre>
+</div>
+
+<p><code>go test ./pkg/session/</code> fails — <code>Run</code> has the wrong signature. Now update <code>session.go</code> to make it pass:</p>
+
+<div class="tdd-step tdd-green">
+  <div class="tdd-header">Green — updated session.go</div>
+<pre><span class="kw">package</span> session
+
+<span class="kw">import</span> <span class="str">"context"</span>
+
+<span class="kw">type</span> <span class="typ">LLMClient</span> <span class="kw">interface</span> {
+    <span class="fn">Complete</span>(ctx <span class="typ">context.Context</span>, prompt <span class="typ">string</span>) (<span class="typ">string</span>, <span class="typ">error</span>)
+}
+
+<span class="kw">func</span> <span class="fn">Run</span>(ctx <span class="typ">context.Context</span>, in <span class="op">&lt;-</span><span class="kw">chan</span> <span class="typ">string</span>, out <span class="kw">chan</span><span class="op">&lt;-</span> <span class="typ">string</span>, llm <span class="typ">LLMClient</span>) {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> msg <span class="op">:=</span> <span class="op">&lt;-</span>in:
+            response, err <span class="op">:=</span> llm.<span class="fn">Complete</span>(ctx, msg)
+            <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+                <span class="kw">continue</span>
+            }
+            out <span class="op">&lt;-</span> response
+        <span class="kw">case</span> <span class="op">&lt;-</span>ctx.<span class="fn">Done</span>():
+            <span class="kw">return</span>
+        }
+    }
+}</pre>
+</div>
+
+<p>The test passes. <code>stubLLM</code> satisfies <code>LLMClient</code> implicitly — Go checks that it has a <code>Complete</code> method with the right signature, same as <code>Monster</code> satisfying <code>Combatant</code>.</p>
+
+<hr>
+
+<h2><span class="tag tag-bot">Bot</span> Wiring the Real Anthropic SDK</h2>
+
+<p>The stub proves <code>Run</code> works. Now create a concrete <code>LLMClient</code> that calls Anthropic. Put it in <code>pkg/llm</code> — separate package, separate concern.</p>
+
+<pre><span class="cmt">$ go get github.com/anthropics/anthropic-sdk-go</span></pre>
+
+<p>Create <code>pkg/llm/anthropic.go</code>:</p>
+
+<pre><span class="kw">package</span> llm
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"fmt"</span>
+
+    anthropic <span class="str">"github.com/anthropics/anthropic-sdk-go"</span>
+)
+
+<span class="kw">type</span> <span class="typ">AnthropicClient</span> <span class="kw">struct</span> {
+    client <span class="op">*</span><span class="typ">anthropic.Client</span>
+}
+
+<span class="kw">func</span> <span class="fn">NewAnthropicClient</span>() <span class="op">*</span><span class="typ">AnthropicClient</span> {
+    <span class="kw">return</span> <span class="op">&amp;</span><span class="typ">AnthropicClient</span>{client: anthropic.<span class="fn">NewClient</span>()}
+    <span class="cmt">// NewClient reads ANTHROPIC_API_KEY from the environment automatically.</span>
+}
+
+<span class="kw">func</span> (a <span class="op">*</span><span class="typ">AnthropicClient</span>) <span class="fn">Complete</span>(ctx <span class="typ">context.Context</span>, prompt <span class="typ">string</span>) (<span class="typ">string</span>, <span class="typ">error</span>) {
+    msg, err <span class="op">:=</span> a.client.Messages.<span class="fn">New</span>(ctx, anthropic.<span class="typ">MessageNewParams</span>{
+        Model:     anthropic.<span class="fn">F</span>(anthropic.ModelClaude3_5SonnetLatest),
+        MaxTokens: anthropic.<span class="fn">F</span>(<span class="kw">int64</span>(<span class="num">1024</span>)),
+        Messages: anthropic.<span class="fn">F</span>([]<span class="typ">anthropic.MessageParam</span>{
+            anthropic.<span class="fn">NewUserMessage</span>(anthropic.<span class="fn">NewTextBlock</span>(prompt)),
+        }),
+    })
+    <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="str">""</span>, err
+    }
+    <span class="kw">if</span> <span class="fn">len</span>(msg.Content) <span class="op">==</span> <span class="num">0</span> {
+        <span class="kw">return</span> <span class="str">""</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"empty response from API"</span>)
+    }
+    <span class="kw">return</span> msg.Content[<span class="num">0</span>].Text, <span class="kw">nil</span>
+}</pre>
+
+<p>Notice: <code>AnthropicClient</code> never mentions <code>session.LLMClient</code>. It doesn't need to. Go checks the interface match at the call site — wherever you pass an <code>*AnthropicClient</code> as an <code>LLMClient</code>, the compiler verifies it satisfies the interface. The SDK package has no idea the interface exists.</p>
+
+<p>In <code>main.go</code>, wiring it together looks like:</p>
+
+<pre>llmClient <span class="op">:=</span> llm.<span class="fn">NewAnthropicClient</span>()
+ctx, cancel <span class="op">:=</span> context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+<span class="kw">defer</span> <span class="fn">cancel</span>()
+<span class="kw">go</span> session.<span class="fn">Run</span>(ctx, in, out, llmClient)</pre>
+
+<div class="flow">
+  <span class="flow-label">// request flow</span>
+  Discord message
+  <span class="flow-arrow">→</span> in channel
+  <span class="flow-arrow">→</span> Run goroutine
+  <span class="flow-arrow">→</span> llm.Complete(ctx, msg)
+  <span class="flow-arrow">→</span> Anthropic API
+  <span class="flow-arrow">→</span> out channel
+  <span class="flow-arrow">→</span> Discord reply
+</div>
+
+<div class="bot-note">
+  <strong>What you have now:</strong> a goroutine that reads player messages, calls an LLM, and writes the response — all cancellable via context. The agent loop is real. The Discord/Slack frontend is what wires the channels to actual messages. That's Phase 4.
+</div>
+
+<div class="alert">
+  <strong>Don't commit ANTHROPIC_API_KEY.</strong> Read it from the environment (<code>os.Getenv("ANTHROPIC_API_KEY")</code>) or a <code>.env</code> file excluded by <code>.gitignore</code>. The SDK's <code>NewClient()</code> reads the environment automatically — you don't need to pass the key manually unless you're overriding it.
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. <code>context.WithCancel</code> returns two values. What are they?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> a child context and a channel</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> a child context and a cancel function</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> a parent context and a cancel function</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> a timeout duration and a cancel function</label>
+    </div>
+    <button class="check-btn" onclick="check('q1')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. Why is <code>context.Context</code> always the first parameter, never the last?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> the compiler requires it in that position</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> it is a universally followed convention so grep and tooling can rely on it</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> context must be evaluated before other arguments</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> placing it last would prevent defer from working</label>
+    </div>
+    <button class="check-btn" onclick="check('q2')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. <code>LLMClient</code> is defined in <code>pkg/session</code>, not in <code>pkg/llm</code>. Why?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> the compiler requires interfaces to live in the same package as the struct that uses them</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> the consumer defines the interface it needs, so the concrete type does not need to know it exists</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> pkg/llm would cause a circular import if it defined the interface</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> interfaces defined in the same package as the struct that satisfies them cannot be mocked in tests</label>
+    </div>
+    <button class="check-btn" onclick="check('q3')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. You pass <code>ctx</code> into <code>llm.Complete(ctx, msg)</code>. The context is cancelled mid-request. What happens?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> the request completes normally; context only affects future calls</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> the in-flight HTTP request is aborted and Complete returns an error</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> the goroutine panics with a context deadline exceeded error</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> the request is retried automatically with a new context</label>
+    </div>
+    <button class="check-btn" onclick="check('q4')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://pkg.go.dev/context">pkg.go.dev/context</a> — the standard library docs. Read the package overview paragraph; it's unusually well-written.</p>
+  <p><strong>Deep dive &rarr;</strong> <a href="https://go.dev/blog/context">Go Blog: Contexts and structs</a> — why context goes in function params, not struct fields.</p>
+  <p><strong>SDK reference &rarr;</strong> <a href="https://pkg.go.dev/github.com/anthropics/anthropic-sdk-go">anthropic-sdk-go</a> — check the <code>Messages.New</code> signature if the params in this lesson have drifted.</p>
+  <p><strong>Next &rarr;</strong> Lesson 10: D&D Skills &amp; Proficiency — the last rules layer before the Referee agent can adjudicate any check a player throws at it.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0008-goroutines-channels.html">Lesson 08: Goroutines &amp; Channels</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about <code>context.WithTimeout</code>, <code>context.WithDeadline</code>, or why you should never store a context in a struct.</p>
+</div>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'b', q2: 'b', q3: 'b', q4: 'b' };
+  const explain = {
+    q1: '<code>context.WithCancel(parent)</code> returns a derived child context and a <code>cancel func()</code>. Calling cancel closes <code>ctx.Done()</code> on the child and all its descendants.',
+    q2: 'Convention only — the compiler doesn\'t enforce it. But it\'s followed so universally that linters flag violations and Go authors expect it. It signals "this function respects cancellation."',
+    q3: 'The consumer defines the interface it needs — <code>pkg/session</code> owns <code>LLMClient</code>. <code>AnthropicClient</code> satisfies it implicitly without knowing the interface exists. This is the same design as <code>Combatant</code> in <code>pkg/combat</code>.',
+    q4: 'The SDK passes <code>ctx</code> into the underlying HTTP request. When the context is cancelled, the HTTP client aborts the request and <code>Complete</code> returns an error immediately. This is why passing context through is important — it prevents goroutine leaks on cancellation.',
+  };
+  function check(qid) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answers[qid] = sel.value === correct[qid];
+    fb.innerHTML = answers[qid]
+      ? `<span class="ok">&#10003; Correct.</span> ${explain[qid]}`
+      : `<span class="no">&#10007; Not quite.</span> ${explain[qid]}`;
+    if (Object.keys(answers).length === 4) {
+      const score = Object.values(answers).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Implement pkg/llm, then Lesson 10.' : score >= 3 ? 'Good — review what you missed.' : 'Reread the context and interface sections.'}`;
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 08 — Goroutines &amp; Channels</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go   { background: #e8f3e8; color: #004d00; }
+    .tag-bot  { background: #e8eaf3; color: #1a1a8b; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .op  { color: #d4d4d4; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+    .alert { background: #fdf0f0; border-left: 3px solid #8b0000; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .alert strong { color: #8b0000; }
+
+    .tdd-step { border: 1.5px solid #ddd; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .tdd-header { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; font-weight: 700; }
+    .tdd-red    .tdd-header { background: #fdf0f0; color: #8b0000; border-bottom: 1.5px solid #f5c2c2; }
+    .tdd-green  .tdd-header { background: #f0fdf0; color: #1a5c1a; border-bottom: 1.5px solid #b8e0b8; }
+    .tdd-step pre { margin: 0; border-radius: 0; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0008 &middot; Go</div>
+<h1>Goroutines &amp; Channels</h1>
+<p class="subtitle">How Go handles concurrency — and why it's the right model for a bot that runs dozens of campaign sessions at once.</p>
+
+<p>In Python you reach for <code>asyncio</code> or threads when you need to do two things at once. Go has a different answer: <strong>goroutines</strong> and <strong>channels</strong>. These aren't a library bolt-on — they're built into the language. Understanding them is the biggest conceptual jump from Python to Go, and it's the foundation of everything the bot does concurrently: handling multiple Discord guilds, routing agent messages, processing dice rolls while streaming a narrative response.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Goroutines</h2>
+
+<p>A goroutine is a function running concurrently with the rest of your program. You launch one with the <code>go</code> keyword:</p>
+
+<pre><span class="kw">go</span> <span class="fn">someFunction</span>()</pre>
+
+<p>That's it. The function starts immediately in the background. Your current code keeps running — it doesn't wait.</p>
+
+<h3>How goroutines differ from threads</h3>
+<p>OS threads are expensive: each one reserves ~1MB of stack space and requires a kernel context switch. Goroutines start with a ~2KB stack that grows as needed and are multiplexed onto a small pool of OS threads by the Go runtime scheduler. You can run tens of thousands of goroutines in a single process without issue — the bot can maintain one goroutine per active campaign session with no sweat.</p>
+
+<div class="callout">
+  <strong>Python analogy:</strong> goroutines are closer to <code>asyncio</code> coroutines than to threads — they're cooperative and scheduled by the runtime. But unlike <code>asyncio</code>, you don't need <code>await</code> everywhere. Any blocking call (channel read, disk I/O) just yields the goroutine automatically. The scheduler is preemptive.
+</div>
+
+<h3>Goroutine lifecycle</h3>
+<p>A goroutine exits when its function returns. There's no handle you can join or cancel directly — you signal it through a channel (covered below). This matters: a goroutine that's blocked waiting on a channel with no sender will leak forever. The Go race detector (<code>go test -race</code>) catches many of these.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Channels</h2>
+
+<p>Goroutines communicate through channels. A channel is a typed pipe: you send a value in from one end and receive it out the other. The Go mantra is:</p>
+
+<div class="callout">
+  <strong>"Don't communicate by sharing memory; share memory by communicating."</strong><br>
+  Instead of a shared variable protected by a mutex, pass values through a channel. One goroutine owns the value; it hands it off via the channel. No lock needed.
+</div>
+
+<h3>Creating and using a channel</h3>
+
+<pre><span class="cmt">// make(chan T) creates an unbuffered channel of type T</span>
+ch <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="typ">string</span>)
+
+<span class="cmt">// send: ch <- value   (blocks until a receiver is ready)</span>
+ch <span class="op">&lt;-</span> <span class="str">"hello"</span>
+
+<span class="cmt">// receive: value := <-ch   (blocks until a sender sends)</span>
+msg <span class="op">:=</span> <span class="op">&lt;-</span>ch</pre>
+
+<p><strong>Unbuffered channels block on both ends.</strong> The sender waits until a receiver is ready; the receiver waits until a sender sends. This synchronization is the whole point — it's a rendezvous, not a queue.</p>
+
+<h3>Directional channels</h3>
+
+<p>You can restrict a channel to send-only or receive-only. This is idiomatic in function signatures — it makes intent explicit and lets the compiler enforce it:</p>
+
+<pre><span class="cmt">// send-only: can only write to this channel</span>
+<span class="kw">func</span> <span class="fn">produce</span>(out <span class="kw">chan</span><span class="op">&lt;-</span> <span class="typ">string</span>) { out <span class="op">&lt;-</span> <span class="str">"roll"</span> }
+
+<span class="cmt">// receive-only: can only read from this channel</span>
+<span class="kw">func</span> <span class="fn">consume</span>(in <span class="op">&lt;-</span><span class="kw">chan</span> <span class="typ">string</span>) { msg <span class="op">:=</span> <span class="op">&lt;-</span>in; _ <span class="op">=</span> msg }</pre>
+
+<p>A bidirectional <code>chan string</code> converts implicitly to either directional form — you make it at the call site and pass it in restricted.</p>
+
+<h3>Ranging over a channel</h3>
+
+<p>A <code>for range</code> loop on a channel reads values until the channel is closed. This is the standard agent loop pattern:</p>
+
+<pre><span class="kw">for</span> msg <span class="op">:=</span> <span class="kw">range</span> in {
+    <span class="cmt">// process each message as it arrives</span>
+    out <span class="op">&lt;-</span> <span class="fn">process</span>(msg)
+}
+<span class="cmt">// loop exits only when in is closed</span></pre>
+
+<p>The loop blocks between messages — the goroutine is suspended until the next value arrives. Closing the channel from the sender side signals "no more values." Closing from the receiver side is a panic — only the sender closes.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Select</h2>
+
+<p><code>select</code> is like a <code>switch</code> for channel operations. It blocks until one of its cases is ready, then executes that case. If multiple are ready, it picks one at random:</p>
+
+<pre><span class="kw">select</span> {
+<span class="kw">case</span> msg <span class="op">:=</span> <span class="op">&lt;-</span>playerMsg:
+    <span class="fn">handlePlayerMessage</span>(msg)
+<span class="kw">case</span> <span class="op">&lt;-</span>done:
+    <span class="kw">return</span> <span class="cmt">// shutdown signal received</span>
+}</pre>
+
+<p>The <code>done</code> channel pattern is the standard way to cancel a goroutine: the parent closes a <code>chan struct{}</code> (zero-size type, costs nothing), and the goroutine's <code>select</code> picks it up and returns.</p>
+
+<div class="bot-note">
+  <strong>How this maps to the bot:</strong><br>
+  One goroutine per Discord guild — it loops over an incoming message channel with <code>for range</code> and a <code>done</code> channel in <code>select</code>. The orchestrator sends player messages in; the agent loop reads them out and sends LLM responses back through an outbound channel. Campaign sessions start and stop by opening and closing channels.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> TDD: Build a Session Runner</h2>
+
+<p>You're going to build <code>pkg/session</code> — a goroutine that processes incoming game messages and sends results out. This is the skeleton of the bot's per-guild loop.</p>
+
+<p><strong>Step 1 — write the failing test first.</strong> Create <code>pkg/session/session_test.go</code>:</p>
+
+<div class="tdd-step tdd-red">
+  <div class="tdd-header">Red — test that doesn't compile yet</div>
+<pre><span class="kw">package</span> session
+
+<span class="kw">import</span> <span class="str">"testing"</span>
+
+<span class="kw">func</span> <span class="fn">TestRun</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    in   <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="typ">string</span>)
+    out  <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="typ">string</span>)
+    done <span class="op">:=</span> <span class="fn">make</span>(<span class="kw">chan</span> <span class="kw">struct</span>{})
+
+    <span class="kw">go</span> <span class="fn">Run</span>(in, out, done)
+
+    in <span class="op">&lt;-</span> <span class="str">"attack goblin"</span>
+    got <span class="op">:=</span> <span class="op">&lt;-</span>out
+    <span class="kw">if</span> got <span class="op">!=</span> <span class="str">"attack goblin"</span> {
+        t.<span class="fn">Errorf</span>(<span class="str">"got %q, want %q"</span>, got, <span class="str">"attack goblin"</span>)
+    }
+
+    <span class="fn">close</span>(done)
+}</pre>
+</div>
+
+<p>Run <code>go test ./pkg/session/</code> — it fails to compile because <code>Run</code> doesn't exist. That's the red state you want.</p>
+
+<p><strong>Step 2 — implement to green.</strong> Create <code>pkg/session/session.go</code>:</p>
+
+<div class="tdd-step tdd-green">
+  <div class="tdd-header">Green — minimal implementation</div>
+<pre><span class="kw">package</span> session
+
+<span class="kw">func</span> <span class="fn">Run</span>(in <span class="op">&lt;-</span><span class="kw">chan</span> <span class="typ">string</span>, out <span class="kw">chan</span><span class="op">&lt;-</span> <span class="typ">string</span>, done <span class="op">&lt;-</span><span class="kw">chan</span> <span class="kw">struct</span>{}) {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> msg <span class="op">:=</span> <span class="op">&lt;-</span>in:
+            out <span class="op">&lt;-</span> msg
+        <span class="kw">case</span> <span class="op">&lt;-</span>done:
+            <span class="kw">return</span>
+        }
+    }
+}</pre>
+</div>
+
+<p>Run <code>go test ./pkg/session/</code> — it should pass. Notice:</p>
+
+<ul>
+  <li><code>in</code> is <code>&lt;-chan string</code> — receive-only, <code>Run</code> can't accidentally send to it</li>
+  <li><code>out</code> is <code>chan&lt;- string</code> — send-only, <code>Run</code> can't accidentally read from it</li>
+  <li><code>done</code> is <code>&lt;-chan struct{}</code> — receive-only; <code>struct{}</code> costs zero bytes</li>
+  <li>The <code>select</code> races <code>in</code> against <code>done</code> — whichever is ready first wins</li>
+  <li>The test calls <code>go Run(...)</code> — <code>Run</code> is the goroutine, not the test</li>
+</ul>
+
+<div class="alert">
+  <strong>If the test hangs:</strong> you have a deadlock. Either <code>Run</code> is blocked waiting to send and nothing's receiving, or the test is blocked waiting to receive and <code>Run</code> hasn't sent. Add <code>t.Parallel()</code> and a timeout context if you want to catch hangs automatically.
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. You send to an unbuffered channel. No goroutine is currently receiving. What happens?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> the value is dropped silently</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> the sending goroutine panics</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> the sending goroutine blocks until a receiver is ready</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> the value is queued inside the channel</label>
+    </div>
+    <button class="check-btn" onclick="check('q1')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. A function parameter is typed <code>&lt;-chan string</code>. What can that function do with it?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> send values and receive values</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> receive values only</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> send values only</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> close the channel</label>
+    </div>
+    <button class="check-btn" onclick="check('q2')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. <code>for msg := range ch { ... }</code> — when does this loop exit?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> when the channel has no waiting senders</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> when the channel is closed by the sender</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> when the channel is closed by the receiver</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> after processing a fixed number of messages</label>
+    </div>
+    <button class="check-btn" onclick="check('q3')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. Two goroutines both write to a shared <code>map</code> with no synchronization. What does the Go race detector report?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> no issue — maps are thread-safe in Go</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> a data race — concurrent map writes are undefined behavior</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> a deadlock — maps lock automatically on write</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> a compile error — maps cannot be shared across goroutines</label>
+    </div>
+    <button class="check-btn" onclick="check('q4')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://go.dev/tour/concurrency/1">A Tour of Go — Concurrency</a> — the official interactive tour. Work through "Goroutines" and "Channels." The select and default sections are useful too.</p>
+  <p><strong>Deep dive &rarr;</strong> <a href="https://go.dev/blog/pipelines">Go Blog: Pipelines and Cancellation</a> — how the done-channel pattern scales to multi-stage pipelines. This is exactly the shape of the agent loop.</p>
+  <p><strong>Next &rarr;</strong> Lesson 09: Interfaces &amp; the Agent Loop — wire the session goroutine to a real LLM call using the Anthropic Go SDK.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0007-spellcasting.html">Lesson 07: Spellcasting</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about buffered channels, <code>sync.WaitGroup</code>, or how Go's scheduler differs from Python's GIL.</p>
+</div>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'c', q2: 'b', q3: 'b', q4: 'b' };
+  const explain = {
+    q1: 'Unbuffered channels block the sender until a receiver is ready. This is the synchronization guarantee — not a queue, a rendezvous.',
+    q2: '<code>&lt;-chan T</code> is receive-only. The arrow before <code>chan</code> means "values flow out to you." You cannot send or close it.',
+    q3: '<code>for range</code> on a channel blocks between values and exits only when the channel is closed by the sender. Closing from the receiver side is a panic.',
+    q4: 'Go maps are not goroutine-safe. Concurrent writes (or a write concurrent with any read) is a data race. The race detector will catch it; in production it can corrupt the map or crash.',
+  };
+  function check(qid) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answers[qid] = sel.value === correct[qid];
+    fb.innerHTML = answers[qid]
+      ? `<span class="ok">&#10003; Correct.</span> ${explain[qid]}`
+      : `<span class="no">&#10007; Not quite.</span> ${explain[qid]}`;
+    if (Object.keys(answers).length === 4) {
+      const score = Object.values(answers).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Write pkg/session — then Lesson 09.' : score >= 3 ? 'Good — review what you missed before implementing.' : 'Reread the channels section and the TDD walkthrough.'}`;
+    }
+  }
+</script>
+</body>
+</html>
