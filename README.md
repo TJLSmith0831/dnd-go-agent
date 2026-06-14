@@ -1,5 +1,7 @@
 # dnd-go-agent
 
+![dnd-go-agent](./title-image.png)
+
 A multi-agent D&D bot written in Go. Two modes share one orchestrator:
 
 - **DM mode** — Discord, full fantasy campaigns with Narrator, NPC, and Referee agents and persistent world state
