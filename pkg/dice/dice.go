@@ -46,3 +46,32 @@ func AbilityCheck(score, dc int) (CheckResult, error) {
 		Success:  total >= dc,
 	}, nil
 }
+
+// Methods on Structs
+// A method is a function with a receiver — a type argument that comes before
+// the function name. The receiver is what connects the function to the type.
+
+// Value receiver - reads only, gets a copy
+func (c CheckResult) IsSuccess() bool {
+	return c.Success
+}
+
+func (c CheckResult) IsCritical() bool {
+	return c.Roll == 20
+}
+
+// Value receiver - formats for display
+// String() string satisfies fmt.Stringer interface
+// Any type with a String() method will automatically work with fmt.Printf("%s", value)
+// fmt.Println(), fmt.Sprintf(), etc.
+func (c CheckResult) String() string {
+	outcome := "miss"
+	if c.Success {
+		outcome = "hit"
+	}
+	// Format: "Roll: 15 + Modifier: 2 = Total: 17 (DC: 15) - hit"
+	return fmt.Sprintf(
+		"Roll: %d + Modifier: %d = Total: %d (DC: %d) - %s",
+		c.Roll, c.Modifier, c.Total, c.DC, outcome,
+	)
+}
