@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 12 — Conditions &amp; iota</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-dnd { background: #f3e8e8; color: #8b0000; }
+    .tag-go  { background: #e8f3e8; color: #004d00; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .op  { color: #d4d4d4; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+    .formula { background: #f0ede8; border-left: 3px solid #8b0000; padding: 0.65rem 1.25rem; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; border-radius: 0 4px 4px 0; line-height: 1.6; }
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+    table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.91rem; }
+    th { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 2px solid #1a1a1a; font-weight: 600; font-size: 0.88rem; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #e8e8e3; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .tdd-step { border: 1.5px solid #ddd; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .tdd-header { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; font-weight: 700; }
+    .tdd-red   .tdd-header { background: #fdf0f0; color: #8b0000; border-bottom: 1.5px solid #f5c2c2; }
+    .tdd-green .tdd-header { background: #f0fdf0; color: #1a5c1a; border-bottom: 1.5px solid #b8e0b8; }
+    .tdd-step pre { margin: 0; border-radius: 0; }
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0012 &middot; D&amp;D 5e + Go</div>
+<h1>Conditions &amp; iota</h1>
+<p class="subtitle">The status effects that flip attack rolls and restrict actions — and Go's bit-flag pattern that tracks them all in a single integer.</p>
+
+<p>A dragon breathes fire and three party members fall Prone. The wizard casts <em>Hold Person</em> and the bandit captain is Paralyzed. The rogue drinks poison by mistake and is now Poisoned. Each condition changes the rules of combat for that character — which rolls have disadvantage, what actions are forbidden, whether hits are automatic crits. The Referee agent has to track all of this per combatant and apply it at the right moment.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The Conditions</h2>
+
+<p>There are 15 official conditions in 5e. These are the eight most common in play:</p>
+
+<table>
+  <thead><tr><th>Condition</th><th>Key mechanical effects</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Blinded</strong></td><td>Auto-fail sight checks. Your attacks: disadvantage. Attacks against you: advantage.</td></tr>
+    <tr><td><strong>Frightened</strong></td><td>Disadvantage on attacks and ability checks while source is visible. Can't move closer to source.</td></tr>
+    <tr><td><strong>Incapacitated</strong></td><td>Can't take actions or reactions. Many conditions include this.</td></tr>
+    <tr><td><strong>Paralyzed</strong></td><td>Incapacitated + can't move or speak. Auto-fail STR/DEX saves. Attacks against: advantage. Melee hits within 5 ft: auto-crit.</td></tr>
+    <tr><td><strong>Poisoned</strong></td><td>Disadvantage on attack rolls and ability checks.</td></tr>
+    <tr><td><strong>Prone</strong></td><td>Your attacks: disadvantage. Melee attacks against: advantage. Ranged attacks against: disadvantage. Costs half movement to stand.</td></tr>
+    <tr><td><strong>Restrained</strong></td><td>Speed 0. Your attacks: disadvantage. Your DEX saves: disadvantage. Attacks against: advantage.</td></tr>
+    <tr><td><strong>Stunned</strong></td><td>Incapacitated + can't move. Auto-fail STR/DEX saves. Attacks against: advantage.</td></tr>
+  </tbody>
+</table>
+
+<h3>Conditions that cascade</h3>
+
+<p><strong>Paralyzed includes Incapacitated.</strong> So does Stunned. If you're tracking conditions as a set, a Paralyzed character is also effectively Incapacitated — you don't add it separately, but any check for Incapacitated must match. The cleanest model: the Referee checks each condition independently when computing modifiers, and Paralyzed's definition lists all its effects explicitly.</p>
+
+<div class="callout">
+  <strong>BG3 note:</strong> the red/orange/purple icons that stack on a character portrait during combat are all conditions. When a character is Stunned, BG3 greys out their action button — that's Incapacitated enforced by the engine. Your bot does the same thing in code.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> How Conditions Affect Rolls</h2>
+
+<p>Most conditions apply to the d20 roll via <strong>Advantage</strong> or <strong>Disadvantage</strong> (recall: roll two d20s, take the higher or lower). The bot's resolution path gains a step:</p>
+
+<div class="formula">1. Is the attacker's condition granting disadvantage on this attack?
+2. Is the defender's condition granting advantage to the attacker?
+3. Do both apply? → they cancel (any advantage + any disadvantage = straight roll)
+4. Roll accordingly, then check for auto-crit conditions (Paralyzed, Stunned)</div>
+
+<p>This is why conditions are tracked as a <em>set</em>, not a list of modifiers. You query the set at resolution time: "does the attacker have any condition that penalises attacks?" rather than precomputing a number.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> iota and Bit Flags</h2>
+
+<p>Eight conditions that can be present or absent in any combination — this is a set of boolean flags. You could use a <code>map[string]bool</code>, but Go has a more compact and efficient pattern: <strong>bit flags with <code>iota</code></strong>.</p>
+
+<p><code>iota</code> is a counter that resets to 0 at the start of each <code>const</code> block and increments by 1 for each constant. Used with bit-shifting, it gives each constant its own unique bit:</p>
+
+<pre><span class="kw">type</span> <span class="typ">Condition</span> <span class="typ">uint16</span>
+
+<span class="kw">const</span> (
+    <span class="typ">Blinded</span>       <span class="typ">Condition</span> <span class="op">=</span> <span class="num">1</span> <span class="op">&lt;&lt;</span> <span class="kw">iota</span> <span class="cmt">// 0000_0001 = 1</span>
+    <span class="typ">Frightened</span>                             <span class="cmt">// 0000_0010 = 2</span>
+    <span class="typ">Incapacitated</span>                          <span class="cmt">// 0000_0100 = 4</span>
+    <span class="typ">Paralyzed</span>                              <span class="cmt">// 0000_1000 = 8</span>
+    <span class="typ">Poisoned</span>                               <span class="cmt">// 0001_0000 = 16</span>
+    <span class="typ">Prone</span>                                  <span class="cmt">// 0010_0000 = 32</span>
+    <span class="typ">Restrained</span>                             <span class="cmt">// 0100_0000 = 64</span>
+    <span class="typ">Stunned</span>                                <span class="cmt">// 1000_0000 = 128</span>
+)</pre>
+
+<p>Each constant occupies exactly one bit. A <code>uint16</code> can hold all 16 possible conditions in 2 bytes.</p>
+
+<h3>Bitwise operations on the set</h3>
+
+<pre><span class="kw">type</span> <span class="typ">ConditionSet</span> <span class="kw">struct</span>{ flags <span class="typ">Condition</span> }
+
+<span class="cmt">// Apply sets a bit:  OR with the condition's bit</span>
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Apply</span>(c <span class="typ">Condition</span>)  { cs.flags <span class="op">|=</span> c }
+
+<span class="cmt">// Remove clears a bit: AND-NOT (&^) with the condition's bit</span>
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Remove</span>(c <span class="typ">Condition</span>) { cs.flags <span class="op">&amp;^=</span> c }
+
+<span class="cmt">// Has checks a bit:  AND — non-zero means the bit is set</span>
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Has</span>(c <span class="typ">Condition</span>) <span class="typ">bool</span> { <span class="kw">return</span> cs.flags<span class="op">&amp;</span>c <span class="op">!=</span> <span class="num">0</span> }</pre>
+
+<p><code>&^</code> is Go's <em>bit-clear</em> (AND-NOT) operator. Python doesn't have it — the equivalent is <code>flags &amp; ~condition</code>. It zeroes the bits in the left operand wherever the right operand has a 1.</p>
+
+<h3>Checking multiple conditions at once</h3>
+
+<pre><span class="cmt">// Does this combatant have disadvantage on their attack roll?</span>
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">AttackDisadvantage</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> cs.<span class="fn">Has</span>(<span class="typ">Blinded</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Frightened</span>) <span class="op">||</span>
+        cs.<span class="fn">Has</span>(<span class="typ">Poisoned</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Prone</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Restrained</span>)
+}
+
+<span class="cmt">// Do attacks against this combatant have advantage?</span>
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">GrantsAdvantageToAttackers</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> cs.<span class="fn">Has</span>(<span class="typ">Blinded</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Paralyzed</span>) <span class="op">||</span>
+        cs.<span class="fn">Has</span>(<span class="typ">Restrained</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Stunned</span>)
+}</pre>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> TDD: Add ConditionSet to pkg/combat</h2>
+
+<p>Add to <code>pkg/combat/combatant.go</code> (or a new <code>pkg/combat/conditions.go</code>). Write tests first:</p>
+
+<div class="tdd-step tdd-red">
+  <div class="tdd-header">Red — conditions_test.go</div>
+<pre><span class="kw">package</span> combat
+
+<span class="kw">import</span> <span class="str">"testing"</span>
+
+<span class="kw">func</span> <span class="fn">TestConditionSet</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    t.<span class="fn">Run</span>(<span class="str">"Apply and Has round-trip"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="kw">var</span> cs <span class="typ">ConditionSet</span>
+        cs.<span class="fn">Apply</span>(<span class="typ">Poisoned</span>)
+        <span class="kw">if</span> <span class="op">!</span>cs.<span class="fn">Has</span>(<span class="typ">Poisoned</span>) {
+            t.<span class="fn">Error</span>(<span class="str">"expected Poisoned after Apply"</span>)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"Remove clears the condition"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="kw">var</span> cs <span class="typ">ConditionSet</span>
+        cs.<span class="fn">Apply</span>(<span class="typ">Prone</span>)
+        cs.<span class="fn">Remove</span>(<span class="typ">Prone</span>)
+        <span class="kw">if</span> cs.<span class="fn">Has</span>(<span class="typ">Prone</span>) {
+            t.<span class="fn">Error</span>(<span class="str">"expected Prone cleared after Remove"</span>)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"Remove does not affect other conditions"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="kw">var</span> cs <span class="typ">ConditionSet</span>
+        cs.<span class="fn">Apply</span>(<span class="typ">Poisoned</span>)
+        cs.<span class="fn">Apply</span>(<span class="typ">Prone</span>)
+        cs.<span class="fn">Remove</span>(<span class="typ">Prone</span>)
+        <span class="kw">if</span> <span class="op">!</span>cs.<span class="fn">Has</span>(<span class="typ">Poisoned</span>) {
+            t.<span class="fn">Error</span>(<span class="str">"Remove(Prone) should not clear Poisoned"</span>)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"Poisoned gives attack disadvantage"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="kw">var</span> cs <span class="typ">ConditionSet</span>
+        cs.<span class="fn">Apply</span>(<span class="typ">Poisoned</span>)
+        <span class="kw">if</span> <span class="op">!</span>cs.<span class="fn">AttackDisadvantage</span>() {
+            t.<span class="fn">Error</span>(<span class="str">"Poisoned should give attack disadvantage"</span>)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"Paralyzed grants advantage to attackers"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="kw">var</span> cs <span class="typ">ConditionSet</span>
+        cs.<span class="fn">Apply</span>(<span class="typ">Paralyzed</span>)
+        <span class="kw">if</span> <span class="op">!</span>cs.<span class="fn">GrantsAdvantageToAttackers</span>() {
+            t.<span class="fn">Error</span>(<span class="str">"Paralyzed should grant advantage to attackers"</span>)
+        }
+    })
+}</pre>
+</div>
+
+<p>Run <code>go test ./pkg/combat/</code> — compile error. Now implement in <code>pkg/combat/conditions.go</code>:</p>
+
+<div class="tdd-step tdd-green">
+  <div class="tdd-header">Green — conditions.go</div>
+<pre><span class="kw">package</span> combat
+
+<span class="kw">type</span> <span class="typ">Condition</span> <span class="typ">uint16</span>
+
+<span class="kw">const</span> (
+    <span class="typ">Blinded</span>       <span class="typ">Condition</span> <span class="op">=</span> <span class="num">1</span> <span class="op">&lt;&lt;</span> <span class="kw">iota</span>
+    <span class="typ">Frightened</span>
+    <span class="typ">Incapacitated</span>
+    <span class="typ">Paralyzed</span>
+    <span class="typ">Poisoned</span>
+    <span class="typ">Prone</span>
+    <span class="typ">Restrained</span>
+    <span class="typ">Stunned</span>
+)
+
+<span class="kw">type</span> <span class="typ">ConditionSet</span> <span class="kw">struct</span>{ flags <span class="typ">Condition</span> }
+
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Apply</span>(c <span class="typ">Condition</span>)       { cs.flags <span class="op">|=</span> c }
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Remove</span>(c <span class="typ">Condition</span>)      { cs.flags <span class="op">&amp;^=</span> c }
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">Has</span>(c <span class="typ">Condition</span>) <span class="typ">bool</span>   { <span class="kw">return</span> cs.flags<span class="op">&amp;</span>c <span class="op">!=</span> <span class="num">0</span> }
+
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">AttackDisadvantage</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> cs.<span class="fn">Has</span>(<span class="typ">Blinded</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Frightened</span>) <span class="op">||</span>
+        cs.<span class="fn">Has</span>(<span class="typ">Poisoned</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Prone</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Restrained</span>)
+}
+
+<span class="kw">func</span> (cs <span class="op">*</span><span class="typ">ConditionSet</span>) <span class="fn">GrantsAdvantageToAttackers</span>() <span class="typ">bool</span> {
+    <span class="kw">return</span> cs.<span class="fn">Has</span>(<span class="typ">Blinded</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Paralyzed</span>) <span class="op">||</span>
+        cs.<span class="fn">Has</span>(<span class="typ">Restrained</span>) <span class="op">||</span> cs.<span class="fn">Has</span>(<span class="typ">Stunned</span>)
+}</pre>
+</div>
+
+<p>Note <code>var cs ConditionSet</code> in the tests — no need for <code>make</code> or a constructor. A zero-value <code>ConditionSet</code> has <code>flags == 0</code>, meaning no conditions. That's exactly right.</p>
+
+<div class="bot-note">
+  <strong>Next wiring step:</strong> add <code>Conditions ConditionSet</code> to <code>Monster</code> and <code>PlayerCharacter</code>, then update <code>ResolveAttack</code> to query <code>attacker.Conditions.AttackDisadvantage()</code> and <code>target.Conditions.GrantsAdvantageToAttackers()</code> before rolling — and implement rolling with advantage/disadvantage (roll twice, take higher/lower).
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. In a <code>const</code> block, what does <code>1 &lt;&lt; iota</code> produce for each successive constant?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> each constant equals its index in the block</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> each constant is a unique power of two</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> each constant equals the sum of those before it</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> each constant is assigned the value one always</label>
+    </div>
+    <button class="check-btn" onclick="check('q1')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. A Poisoned character makes an attack roll. What is the mechanical effect?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> disadvantage on the attack roll and ability checks</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> advantage on the attack roll against the poisoner</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> the attack roll uses a d12 instead of a d20</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> the attack automatically misses on a roll below ten</label>
+    </div>
+    <button class="check-btn" onclick="check('q2')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A fighter is Prone. An enemy archer fires from 60 feet away. What modifier does the archer get?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> advantage, because prone targets cannot dodge well</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> no modifier, because ranged attacks ignore prone</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> disadvantage, because prone targets are low profile</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> disadvantage, because ranged attacks need a clear arc</label>
+    </div>
+    <button class="check-btn" onclick="check('q3')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. <code>cs.flags &amp;^= Prone</code>. What does the <code>&amp;^</code> operator do here?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> sets all bits in flags to match Prone exactly</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> clears only the bit that Prone occupies in flags</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> adds the Prone bit to flags if not already set</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> inverts every bit in flags regardless of Prone</label>
+    </div>
+    <button class="check-btn" onclick="check('q4')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://5e24srd.com/index.html">SRD 5.2</a> — search "Conditions" for the full list with all effects. Every condition is one short paragraph.</p>
+  <p><strong>Next &rarr;</strong> Lesson 13: Postgres &amp; pgx — connect to a real database, write campaign state, and query it. The Narrator agent needs persistent world memory.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0011-error-handling.html">Lesson 11: Error Handling</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about Exhaustion (the 6-level stacking condition), implementing advantage/disadvantage dice rolling, or how <code>iota</code> behaves across multiple const blocks.</p>
+</div>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'b', q2: 'a', q3: 'c', q4: 'b' };
+  const explain = {
+    q1: '<code>iota</code> starts at 0 and increments by 1 each constant. <code>1 &lt;&lt; 0 = 1</code>, <code>1 &lt;&lt; 1 = 2</code>, <code>1 &lt;&lt; 2 = 4</code>, and so on. Each constant gets a unique bit position, so they can coexist in a single integer without overlapping.',
+    q2: 'Poisoned gives disadvantage on attack rolls and ability checks — both. It does not affect saving throws, AC, or damage. It\'s one of the simpler conditions: two penalties, nothing else.',
+    q3: 'Prone gives ranged attackers disadvantage — a low, flat target is harder to hit at range. It gives melee attackers (adjacent) advantage instead. The direction of the modifier flips depending on attack type.',
+    q4: '<code>&amp;^</code> is Go\'s bit-clear (AND-NOT) operator. It clears the bits in the left operand wherever the right operand has a 1, leaving all other bits unchanged. Python\'s equivalent is <code>flags &amp;= ~Prone</code>.',
+  };
+  function check(qid) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answers[qid] = sel.value === correct[qid];
+    fb.innerHTML = answers[qid]
+      ? `<span class="ok">&#10003; Correct.</span> ${explain[qid]}`
+      : `<span class="no">&#10007; Not quite.</span> ${explain[qid]}`;
+    if (Object.keys(answers).length === 4) {
+      const score = Object.values(answers).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Build ConditionSet — then Lesson 13.' : score >= 3 ? 'Good — check what you missed.' : 'Reread the conditions table and iota section.'}`;
+    }
+  }
+</script>
+</body>
+</html>

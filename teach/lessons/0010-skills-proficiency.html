@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 10 — Skills &amp; Proficiency</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-dnd { background: #f3e8e8; color: #8b0000; }
+    .tag-go  { background: #e8f3e8; color: #004d00; }
+    .tag-bot { background: #e8eaf3; color: #1a1a8b; }
+
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .op  { color: #d4d4d4; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+
+    .formula { background: #f0ede8; border-left: 3px solid #8b0000; padding: 0.65rem 1.25rem; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; border-radius: 0 4px 4px 0; line-height: 1.6; }
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.92rem; }
+    th { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 2px solid #1a1a1a; font-weight: 600; font-size: 0.88rem; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #e8e8e3; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    .tdd-step { border: 1.5px solid #ddd; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .tdd-header { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; font-weight: 700; }
+    .tdd-red   .tdd-header { background: #fdf0f0; color: #8b0000; border-bottom: 1.5px solid #f5c2c2; }
+    .tdd-green .tdd-header { background: #f0fdf0; color: #1a5c1a; border-bottom: 1.5px solid #b8e0b8; }
+    .tdd-step pre { margin: 0; border-radius: 0; }
+
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0010 &middot; D&amp;D 5e</div>
+<h1>Skills &amp; Proficiency</h1>
+<p class="subtitle">The modifier system that separates a trained rogue from a blundering paladin — and the last rules layer the Referee agent needs to adjudicate any check.</p>
+
+<p>You can already resolve a raw ability check: d20 + modifier vs DC. But most checks in play aren't raw — they're <em>skill checks</em>, and the difference is proficiency. A ranger tracking footprints through a forest rolls Wisdom, but they also add their proficiency bonus if they're trained in Survival. That bonus is the gap between "roll and hope" and "reliably competent." The Referee agent needs to know both numbers to resolve anything a player attempts.</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> The 18 Skills</h2>
+
+<p>Every skill is anchored to one of the six ability scores. When you call for a skill check, you're calling for a specific ability score <em>applied to a specific context</em>.</p>
+
+<table>
+  <thead><tr><th>Ability</th><th>Skills</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Strength</strong></td><td>Athletics</td></tr>
+    <tr><td><strong>Dexterity</strong></td><td>Acrobatics, Sleight of Hand, Stealth</td></tr>
+    <tr><td><strong>Intelligence</strong></td><td>Arcana, History, Investigation, Nature, Religion</td></tr>
+    <tr><td><strong>Wisdom</strong></td><td>Animal Handling, Insight, Medicine, Perception, Survival</td></tr>
+    <tr><td><strong>Charisma</strong></td><td>Deception, Intimidation, Performance, Persuasion</td></tr>
+    <tr><td><strong>Constitution</strong></td><td><em>(no skills — used for concentration saves and HP)</em></td></tr>
+  </tbody>
+</table>
+
+<p>When a player says "I try to pick the lock," the Referee maps that to Dexterity (Thieves' Tools) — technically a tool proficiency, not a skill, but resolved identically. "I try to recall the dragon's weaknesses" → Intelligence (Arcana). "I try to read the merchant's expression" → Wisdom (Insight).</p>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Proficiency Bonus</h2>
+
+<p>Every character has a proficiency bonus determined solely by their <strong>character level</strong> — not class, not ability scores.</p>
+
+<table>
+  <thead><tr><th>Character Level</th><th>Proficiency Bonus</th></tr></thead>
+  <tbody>
+    <tr><td>1–4</td><td>+2</td></tr>
+    <tr><td>5–8</td><td>+3</td></tr>
+    <tr><td>9–12</td><td>+4</td></tr>
+    <tr><td>13–16</td><td>+5</td></tr>
+    <tr><td>17–20</td><td>+6</td></tr>
+  </tbody>
+</table>
+
+<p>This bonus is added to attack rolls, saving throws, <em>and</em> skill checks — but only when the character is <strong>proficient</strong>. Proficiency is a binary: you either have it or you don't. A wizard proficient in Arcana adds the bonus; a fighter who isn't doesn't.</p>
+
+<h3>Skill check formula</h3>
+
+<div class="formula">proficient:     d20 + ability modifier + proficiency bonus ≥ DC
+not proficient: d20 + ability modifier ≥ DC</div>
+
+<h3>Expertise</h3>
+
+<p>Rogues and Bards can gain <em>expertise</em> in certain skills: they add <strong>double</strong> their proficiency bonus. A level-5 Bard (proficiency +3) with expertise in Persuasion adds +6 to every Charisma (Persuasion) check. This is the only multiplier in 5e — advantage/disadvantage applies to the die, not the modifier.</p>
+
+<div class="formula">expertise: d20 + ability modifier + (proficiency bonus × 2) ≥ DC</div>
+
+<hr>
+
+<h2><span class="tag tag-dnd">D&amp;D 5e</span> Passive Checks</h2>
+
+<p>Sometimes the DM needs to know if a character <em>notices</em> something without them actively looking — sneaking past a guard, spotting a hidden door while walking past. Rather than calling for a roll, the DM uses the character's <strong>passive check score</strong>: a fixed number representing their baseline competence.</p>
+
+<div class="formula">passive check = 10 + ability modifier (+ proficiency bonus if proficient)</div>
+
+<p>The most common is <strong>Passive Perception</strong>. A character with WIS 14 (+2) and proficiency in Perception (+3) has a passive Perception of 15. Any hidden creature or object with a Stealth/DC below 15 is spotted automatically, without a roll.</p>
+
+<div class="callout">
+  <strong>BG3 note:</strong> that number next to the eye icon on each character's portrait — that's their passive Perception. When you walk past a hidden trap and a character automatically spots it, their passive Perception beat the trap's DC.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-bot">Bot</span> The Referee Agent's Decision Tree</h2>
+
+<p>When a player sends a free-text action, the Referee agent must work through four questions before rolling:</p>
+
+<ol style="margin: 0.5rem 0 1rem 1.5rem;">
+  <li style="margin-bottom:0.5rem"><strong>Is a check even needed?</strong> Trivial tasks (walking through an open door) auto-succeed. Impossible tasks (jumping to the moon) auto-fail. Only uncertain outcomes need a roll.</li>
+  <li style="margin-bottom:0.5rem"><strong>Which skill applies?</strong> Map the action to one of the 18 skills (or a raw ability check if no skill fits).</li>
+  <li style="margin-bottom:0.5rem"><strong>Is the character proficient?</strong> Look up their character sheet. Add proficiency bonus if yes, expertise if applicable.</li>
+  <li style="margin-bottom:0.5rem"><strong>What's the DC?</strong> Easy 10, Medium 15, Hard 20, Very Hard 25, Nearly Impossible 30.</li>
+</ol>
+
+<p>Then call <code>SkillCheck</code> and narrate the result.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> TDD: Add SkillCheck to pkg/dice</h2>
+
+<p><code>AbilityCheck</code> already handles d20 + modifier vs DC. <code>SkillCheck</code> is the same with one extra parameter: proficiency. The existing <code>CheckResult</code> struct works as-is — <code>Modifier</code> will hold the combined modifier (ability mod + proficiency if applicable).</p>
+
+<p><strong>Write the tests first</strong> in <code>pkg/dice/dice_test.go</code>:</p>
+
+<div class="tdd-step tdd-red">
+  <div class="tdd-header">Red — add to dice_test.go</div>
+<pre><span class="kw">func</span> <span class="fn">TestSkillCheck</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    t.<span class="fn">Run</span>(<span class="str">"proficient character includes proficiency bonus in modifier"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="cmt">// STR 10 (mod 0), proficiency +3, proficient → modifier must be 3</span>
+        <span class="kw">for</span> <span class="kw">range</span> <span class="num">20</span> {
+            result, err <span class="op">:=</span> <span class="fn">SkillCheck</span>(<span class="num">10</span>, <span class="num">3</span>, <span class="kw">true</span>, <span class="num">1</span>)
+            <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+                t.<span class="fn">Fatal</span>(err)
+            }
+            <span class="kw">if</span> result.Modifier <span class="op">!=</span> <span class="num">3</span> {
+                t.<span class="fn">Errorf</span>(<span class="str">"proficient: got Modifier %d, want 3"</span>, result.Modifier)
+            }
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"non-proficient character omits proficiency bonus"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="cmt">// STR 10 (mod 0), proficiency +3, NOT proficient → modifier must be 0</span>
+        <span class="kw">for</span> <span class="kw">range</span> <span class="num">20</span> {
+            result, err <span class="op">:=</span> <span class="fn">SkillCheck</span>(<span class="num">10</span>, <span class="num">3</span>, <span class="kw">false</span>, <span class="num">1</span>)
+            <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+                t.<span class="fn">Fatal</span>(err)
+            }
+            <span class="kw">if</span> result.Modifier <span class="op">!=</span> <span class="num">0</span> {
+                t.<span class="fn">Errorf</span>(<span class="str">"non-proficient: got Modifier %d, want 0"</span>, result.Modifier)
+            }
+        }
+    })
+}
+
+<span class="kw">func</span> <span class="fn">TestPassiveCheck</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    t.<span class="fn">Run</span>(<span class="str">"proficient passive perception"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="cmt">// WIS 14 (mod +2), proficiency +3, proficient → 10 + 2 + 3 = 15</span>
+        got <span class="op">:=</span> <span class="fn">PassiveCheck</span>(<span class="num">14</span>, <span class="num">3</span>, <span class="kw">true</span>)
+        <span class="kw">if</span> got <span class="op">!=</span> <span class="num">15</span> {
+            t.<span class="fn">Errorf</span>(<span class="str">"got %d, want 15"</span>, got)
+        }
+    })
+
+    t.<span class="fn">Run</span>(<span class="str">"non-proficient passive check"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        <span class="cmt">// WIS 14 (mod +2), not proficient → 10 + 2 = 12</span>
+        got <span class="op">:=</span> <span class="fn">PassiveCheck</span>(<span class="num">14</span>, <span class="num">3</span>, <span class="kw">false</span>)
+        <span class="kw">if</span> got <span class="op">!=</span> <span class="num">12</span> {
+            t.<span class="fn">Errorf</span>(<span class="str">"got %d, want 12"</span>, got)
+        }
+    })
+}</pre>
+</div>
+
+<p>Run <code>go test ./pkg/dice/</code> — fails to compile. Now implement in <code>pkg/dice/dice.go</code>:</p>
+
+<div class="tdd-step tdd-green">
+  <div class="tdd-header">Green — add to dice.go</div>
+<pre><span class="kw">func</span> <span class="fn">SkillCheck</span>(score, profBonus <span class="typ">int</span>, proficient <span class="kw">bool</span>, dc <span class="typ">int</span>) (<span class="typ">CheckResult</span>, <span class="typ">error</span>) {
+    roll, err <span class="op">:=</span> <span class="fn">Roll</span>(<span class="num">20</span>)
+    <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="typ">CheckResult</span>{}, err
+    }
+    mod <span class="op">:=</span> <span class="fn">AbilityModifier</span>(score)
+    <span class="kw">if</span> proficient {
+        mod <span class="op">+=</span> profBonus
+    }
+    total <span class="op">:=</span> roll <span class="op">+</span> mod
+    <span class="kw">return</span> <span class="typ">CheckResult</span>{Roll: roll, Modifier: mod, Total: total, DC: dc, Success: total <span class="op">&gt;=</span> dc}, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">PassiveCheck</span>(score, profBonus <span class="typ">int</span>, proficient <span class="kw">bool</span>) <span class="typ">int</span> {
+    mod <span class="op">:=</span> <span class="fn">AbilityModifier</span>(score)
+    <span class="kw">if</span> proficient {
+        mod <span class="op">+=</span> profBonus
+    }
+    <span class="kw">return</span> <span class="num">10</span> <span class="op">+</span> mod
+}</pre>
+</div>
+
+<p>For expertise, pass <code>profBonus * 2</code> — no new function needed. The caller doubles it before passing it in.</p>
+
+<div class="bot-note">
+  <strong>What the Referee agent now has:</strong><br>
+  <code>AbilityCheck</code> — raw check, no proficiency<br>
+  <code>SkillCheck</code> — check with proficiency/expertise<br>
+  <code>PassiveCheck</code> — fixed score for automatic detection<br>
+  <code>ResolveAttack</code> — weapon attack with crit logic<br>
+  Everything a Referee needs to adjudicate any action a player can take.
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. A rogue (DEX 16, proficiency +3, proficient in Stealth) tries to sneak. What is their total Stealth modifier?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> plus three</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> plus five</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> plus six</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> plus nine</label>
+    </div>
+    <button class="check-btn" onclick="check('q1')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. What is the passive Perception of a character with WIS 14 and proficiency in Perception (proficiency bonus +2)?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> twelve</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> thirteen</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> fourteen</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> sixteen</label>
+    </div>
+    <button class="check-btn" onclick="check('q2')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. A level-5 Bard (proficiency +3) has expertise in Persuasion and CHA 18 (+4 modifier). What total modifier do they add to Persuasion checks?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> plus four</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> plus seven</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> plus ten</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> plus twelve</label>
+    </div>
+    <button class="check-btn" onclick="check('q3')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. A player says "I try to recall what I know about the necromancer's ritual." Which skill does the Referee call for?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> Wisdom (Insight)</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> Intelligence (Religion)</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> Intelligence (Arcana)</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> Intelligence (History)</label>
+    </div>
+    <button class="check-btn" onclick="check('q4')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://5e24srd.com/index.html">SRD 5.2</a> — search "Using Ability Scores" and read the "Proficiency Bonus" and "Skills" sections.</p>
+  <p><strong>Next &rarr;</strong> Lesson 11: Error Handling in Go — <code>errors.Is</code>, <code>errors.As</code>, wrapping errors with <code>fmt.Errorf("%w")</code>, and sentinel errors. The Referee agent needs to surface "no skill match found" vs "dice roll failed" distinctly.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0009-context-llm-interface.html">Lesson 09: Context &amp; the LLM Interface</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about tool proficiencies (Thieves' Tools, Musical Instruments), half-proficiency (the Jack of All Trades Bard feature), or how the Referee agent should handle ambiguous player intent.</p>
+</div>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'c', q2: 'c', q3: 'c', q4: 'c' };
+  const explain = {
+    q1: 'DEX 16 → modifier +3. Proficient → add proficiency +3. Total: +3 + +3 = +6.',
+    q2: 'Passive check = 10 + ability modifier + proficiency (if proficient). WIS 14 → +2. 10 + 2 + 2 = 14.',
+    q3: 'Expertise doubles proficiency: +3 × 2 = +6. Plus CHA modifier +4. Total: +10.',
+    q4: 'Arcana covers knowledge of magic, spells, and magical traditions — including necromantic rituals. Religion covers undead lore in a religious context; History covers past events. Arcana is the better call here.',
+  };
+  function check(qid) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answers[qid] = sel.value === correct[qid];
+    fb.innerHTML = answers[qid]
+      ? `<span class="ok">&#10003; Correct.</span> ${explain[qid]}`
+      : `<span class="no">&#10007; Not quite.</span> ${explain[qid]}`;
+    if (Object.keys(answers).length === 4) {
+      const score = Object.values(answers).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Write SkillCheck and PassiveCheck — then Lesson 11.' : score >= 3 ? 'Good — review what you missed.' : 'Reread the proficiency and passive check sections.'}`;
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 13 — Postgres &amp; pgx</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'EB Garamond', Georgia, serif; font-size: 1.15rem; line-height: 1.75; color: #1a1a1a; background: #faf9f7; max-width: 740px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .lesson-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    h1 { font-size: 2.4rem; font-weight: 600; line-height: 1.15; margin-bottom: 0.4rem; }
+    .subtitle { font-style: italic; color: #555; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.5; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2.25rem 0; }
+    h2 { font-size: 1.45rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; display: flex; align-items: baseline; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+    .tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 0.15em 0.55em; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.07em; vertical-align: middle; flex-shrink: 0; }
+    .tag-go  { background: #e8f3e8; color: #004d00; }
+    .tag-bot { background: #e8eaf3; color: #1a1a8b; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 1.1rem 1.4rem; border-radius: 6px; overflow-x: auto; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.65; }
+    .kw  { color: #569cd6; }
+    .fn  { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .op  { color: #d4d4d4; }
+    .typ { color: #4ec9b0; }
+    .num { color: #b5cea8; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: #eeece7; padding: 0.1em 0.38em; border-radius: 3px; }
+    .callout { background: #f8f5ef; border-left: 3px solid #c8a84b; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .callout strong { color: #5a3e00; }
+    .bot-note { background: #eef0f8; border-left: 3px solid #5566cc; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .bot-note strong { color: #2233aa; }
+    .alert { background: #fdf0f0; border-left: 3px solid #8b0000; padding: 0.7rem 1.2rem; margin: 1.1rem 0; border-radius: 0 4px 4px 0; font-size: 0.95rem; line-height: 1.6; }
+    .alert strong { color: #8b0000; }
+    .tdd-step { border: 1.5px solid #ddd; border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .tdd-header { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; font-weight: 700; }
+    .tdd-red   .tdd-header { background: #fdf0f0; color: #8b0000; border-bottom: 1.5px solid #f5c2c2; }
+    .tdd-green .tdd-header { background: #f0fdf0; color: #1a5c1a; border-bottom: 1.5px solid #b8e0b8; }
+    .tdd-step pre { margin: 0; border-radius: 0; }
+    .flow { background: #1e1e1e; color: #d4d4d4; padding: 1rem 1.4rem; border-radius: 6px; margin: 1.1rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 2; }
+    .flow-cmt { color: #6a9955; font-style: italic; }
+    .flow-arrow { color: #569cd6; }
+    table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.92rem; }
+    th { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 2px solid #1a1a1a; font-weight: 600; font-size: 0.88rem; }
+    td { padding: 0.35rem 0.8rem; border-bottom: 1px solid #e8e8e3; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .quiz { margin-top: 3rem; border-top: 2px solid #1a1a1a; padding-top: 2rem; }
+    .quiz > p { color: #666; font-size: 0.95rem; font-style: italic; margin-bottom: 1.75rem; }
+    .quiz-question { margin-bottom: 2.25rem; }
+    .quiz-q { font-weight: 600; margin-bottom: 0.7rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.8rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.1s; font-size: 0.95rem; line-height: 1.4; }
+    .quiz-option:hover { background: #f0ede8; }
+    .quiz-option input { margin: 0; flex-shrink: 0; }
+    .quiz-feedback { margin-top: 0.5rem; font-size: 0.9rem; min-height: 1.4em; line-height: 1.5; }
+    .ok { color: #2d6a2d; font-weight: 600; }
+    .no { color: #8b0000; font-weight: 600; }
+    .check-btn { margin-top: 0.65rem; padding: 0.35rem 1.1rem; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 4px; font-family: inherit; font-size: 0.88rem; cursor: pointer; }
+    .check-btn:hover { background: #3a3a3a; }
+    #quiz-score { margin-top: 1.5rem; padding: 0.9rem 1.2rem; background: #f0ede8; border-radius: 6px; font-weight: 600; display: none; font-size: 1rem; }
+    .lesson-footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1.5rem; font-size: 0.9rem; color: #555; line-height: 1.65; }
+    .lesson-footer a { color: #005580; }
+    .lesson-footer p { margin-bottom: 0.6rem; }
+  </style>
+</head>
+<body>
+
+<div class="lesson-meta">Lesson 0013 &middot; Go</div>
+<h1>Postgres &amp; pgx</h1>
+<p class="subtitle">The bot can hold a conversation — but it forgets everything when it restarts. This lesson adds the memory layer.</p>
+
+<p>Run the bot right now and play a session. Quit. Run it again. The Narrator has no idea the session happened. For a one-shot that's fine, but a campaign needs continuity — the dragon was wounded last week, the tavern burned down, the NPC the party befriended is still alive. That state lives in Postgres. This lesson wires it in.</p>
+
+<div class="bot-note">
+  <strong>What the bot gains from this lesson:</strong> a <code>Store</code> that saves every message exchanged in a session and reloads the history on reconnect. The Narrator can now reference what happened previously without it being in the current context window.
+</div>
+
+<hr>
+
+<h2><span class="tag tag-bot">Bot</span> The Schema</h2>
+
+<p>Two tables. Keep it minimal — you can always add columns later, but you can't un-ship a bad schema.</p>
+
+<pre><span class="cmt">-- One row per campaign/guild. guild_id ties to the Discord server.</span>
+<span class="kw">CREATE TABLE</span> sessions (
+    id         UUID        <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    guild_id   TEXT        <span class="kw">NOT NULL UNIQUE</span>,
+    created_at TIMESTAMPTZ <span class="kw">NOT NULL DEFAULT</span> now()
+);
+
+<span class="cmt">-- One row per message exchanged. Role identifies who spoke.</span>
+<span class="kw">CREATE TABLE</span> events (
+    id         UUID        <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    session_id UUID        <span class="kw">NOT NULL REFERENCES</span> sessions(id),
+    role       TEXT        <span class="kw">NOT NULL CHECK</span> (role <span class="kw">IN</span> (<span class="str">'player'</span>, <span class="str">'narrator'</span>, <span class="str">'referee'</span>, <span class="str">'npc'</span>)),
+    content    TEXT        <span class="kw">NOT NULL</span>,
+    created_at TIMESTAMPTZ <span class="kw">NOT NULL DEFAULT</span> now()
+);</pre>
+
+<p>The <code>events</code> table is the campaign journal. Every player action and every Narrator response is a row. When the bot reconnects, it queries the last N events and injects them as the LLM's message history — the Narrator "remembers" because the history is reconstructed from the database.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> pgx vs database/sql</h2>
+
+<p>Go's standard library has <code>database/sql</code> — a generic interface over any SQL database. You've probably used something similar in Python (<code>psycopg2</code>, SQLAlchemy). But for Postgres specifically, <code>pgx/v5</code> is the idiomatic choice:</p>
+
+<table>
+  <thead><tr><th></th><th>database/sql + lib/pq</th><th>pgx/v5 directly</th></tr></thead>
+  <tbody>
+    <tr><td>Postgres-specific types</td><td>Manual scanning only</td><td>Native support (UUID, JSONB, arrays)</td></tr>
+    <tr><td>Context cancellation</td><td>Supported</td><td>Supported</td></tr>
+    <tr><td>Connection pooling</td><td>Built-in</td><td><code>pgxpool</code> package</td></tr>
+    <tr><td>Batch queries</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Idiomatic for Postgres?</td><td>Generic — fits any DB</td><td>Yes — Postgres-first</td></tr>
+  </tbody>
+</table>
+
+<p>You already know Postgres well. pgx exposes it more directly than <code>database/sql</code> does — less abstraction, more control.</p>
+
+<pre><span class="cmt">$ go get github.com/jackc/pgx/v5</span></pre>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> Connecting and Running Queries</h2>
+
+<h3>Single connection</h3>
+
+<pre><span class="kw">import</span> <span class="str">"github.com/jackc/pgx/v5"</span>
+
+conn, err <span class="op">:=</span> pgx.<span class="fn">Connect</span>(ctx, os.<span class="fn">Getenv</span>(<span class="str">"DATABASE_URL"</span>))
+<span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> {
+    <span class="kw">return</span> fmt.<span class="fn">Errorf</span>(<span class="str">"connecting to db: %w"</span>, err)
+}
+<span class="kw">defer</span> conn.<span class="fn">Close</span>(ctx)</pre>
+
+<h3>Write — Exec</h3>
+
+<pre><span class="cmt">// Exec for INSERT/UPDATE/DELETE — no rows returned</span>
+_, err <span class="op">:=</span> conn.<span class="fn">Exec</span>(ctx,
+    <span class="str">"INSERT INTO events (session_id, role, content) VALUES ($1, $2, $3)"</span>,
+    sessionID, role, content,
+)</pre>
+
+<p>Parameters are positional (<code>$1</code>, <code>$2</code>...), not named. This is standard Postgres — same as psycopg2.</p>
+
+<h3>Read one row — QueryRow</h3>
+
+<pre><span class="kw">var</span> id <span class="typ">string</span>
+err <span class="op">:=</span> conn.<span class="fn">QueryRow</span>(ctx,
+    <span class="str">"SELECT id FROM sessions WHERE guild_id = $1"</span>,
+    guildID,
+).<span class="fn">Scan</span>(<span class="op">&amp;</span>id)
+<span class="kw">if</span> errors.<span class="fn">Is</span>(err, pgx.<span class="typ">ErrNoRows</span>) {
+    <span class="cmt">// no session yet for this guild</span>
+}</pre>
+
+<p><code>pgx.ErrNoRows</code> is a sentinel — the same pattern you wrote in the referee package. <code>errors.Is</code> unwraps the chain to find it.</p>
+
+<h3>Read multiple rows — Query</h3>
+
+<pre>rows, err <span class="op">:=</span> conn.<span class="fn">Query</span>(ctx,
+    <span class="str">"SELECT role, content FROM events WHERE session_id = $1 ORDER BY created_at"</span>,
+    sessionID,
+)
+<span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> { <span class="kw">return</span> err }
+<span class="kw">defer</span> rows.<span class="fn">Close</span>()
+
+<span class="kw">for</span> rows.<span class="fn">Next</span>() {
+    <span class="kw">var</span> role, content <span class="typ">string</span>
+    <span class="kw">if</span> err <span class="op">:=</span> rows.<span class="fn">Scan</span>(<span class="op">&amp;</span>role, <span class="op">&amp;</span>content); err <span class="op">!=</span> <span class="kw">nil</span> {
+        <span class="kw">return</span> err
+    }
+    <span class="cmt">// use role, content</span>
+}
+<span class="kw">return</span> rows.<span class="fn">Err</span>()</pre>
+
+<div class="alert">
+  <strong><code>defer rows.Close()</code> is not optional.</strong> <code>rows</code> holds an open server-side cursor. If you return early without closing it — including on an error path — the underlying connection is held busy until the pool recycles it. Always <code>defer rows.Close()</code> immediately after checking the error from <code>Query</code>.
+</div>
+
+<p>Also check <code>rows.Err()</code> after the loop. The loop exits normally when rows are exhausted <em>and</em> when a network error occurs mid-stream. Only <code>rows.Err()</code> tells you which.</p>
+
+<hr>
+
+<h2><span class="tag tag-go">Go</span> TDD: Build pkg/store</h2>
+
+<p>Same pattern as <code>pkg/llm</code>: define the interface in the consumer, implement with pgx, test with a stub.</p>
+
+<p>The interface lives in <code>pkg/store/store.go</code>:</p>
+
+<div class="tdd-step tdd-red">
+  <div class="tdd-header">Red — store_test.go</div>
+<pre><span class="kw">package</span> store
+
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"testing"</span>
+)
+
+<span class="kw">type</span> <span class="typ">stubStore</span> <span class="kw">struct</span>{ events []<span class="typ">Event</span> }
+
+<span class="kw">func</span> (s <span class="op">*</span><span class="typ">stubStore</span>) <span class="fn">AppendEvent</span>(_ <span class="typ">context.Context</span>, e <span class="typ">Event</span>) <span class="typ">error</span> {
+    s.events <span class="op">=</span> <span class="fn">append</span>(s.events, e)
+    <span class="kw">return</span> <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> (s <span class="op">*</span><span class="typ">stubStore</span>) <span class="fn">RecentEvents</span>(_ <span class="typ">context.Context</span>, sessionID <span class="typ">string</span>, limit <span class="typ">int</span>) ([]<span class="typ">Event</span>, <span class="typ">error</span>) {
+    <span class="kw">if</span> <span class="fn">len</span>(s.events) <span class="op">&lt;=</span> limit {
+        <span class="kw">return</span> s.events, <span class="kw">nil</span>
+    }
+    <span class="kw">return</span> s.events[<span class="fn">len</span>(s.events)<span class="op">-</span>limit:], <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">TestStore</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+    ctx <span class="op">:=</span> context.<span class="fn">Background</span>()
+    s <span class="op">:=</span> <span class="op">&amp;</span><span class="typ">stubStore</span>{}
+
+    events <span class="op">:=</span> []<span class="typ">Event</span>{
+        {SessionID: <span class="str">"s1"</span>, Role: <span class="str">"player"</span>,   Content: <span class="str">"I attack the goblin"</span>},
+        {SessionID: <span class="str">"s1"</span>, Role: <span class="str">"narrator"</span>, Content: <span class="str">"The goblin dodges"</span>},
+        {SessionID: <span class="str">"s1"</span>, Role: <span class="str">"player"</span>,   Content: <span class="str">"I try again"</span>},
+    }
+    <span class="kw">for</span> _, e <span class="op">:=</span> <span class="kw">range</span> events {
+        <span class="kw">if</span> err <span class="op">:=</span> s.<span class="fn">AppendEvent</span>(ctx, e); err <span class="op">!=</span> <span class="kw">nil</span> {
+            t.<span class="fn">Fatal</span>(err)
+        }
+    }
+
+    t.<span class="fn">Run</span>(<span class="str">"RecentEvents returns last N"</span>, <span class="kw">func</span>(t <span class="op">*</span><span class="typ">testing.T</span>) {
+        got, err <span class="op">:=</span> s.<span class="fn">RecentEvents</span>(ctx, <span class="str">"s1"</span>, <span class="num">2</span>)
+        <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> { t.<span class="fn">Fatal</span>(err) }
+        <span class="kw">if</span> <span class="fn">len</span>(got) <span class="op">!=</span> <span class="num">2</span> {
+            t.<span class="fn">Errorf</span>(<span class="str">"got %d events, want 2"</span>, <span class="fn">len</span>(got))
+        }
+        <span class="kw">if</span> got[<span class="num">0</span>].Content <span class="op">!=</span> <span class="str">"The goblin dodges"</span> {
+            t.<span class="fn">Errorf</span>(<span class="str">"unexpected first event: %q"</span>, got[<span class="num">0</span>].Content)
+        }
+    })
+}</pre>
+</div>
+
+<div class="tdd-step tdd-green">
+  <div class="tdd-header">Green — store.go</div>
+<pre><span class="kw">package</span> store
+
+<span class="kw">import</span> <span class="str">"context"</span>
+
+<span class="kw">type</span> <span class="typ">Event</span> <span class="kw">struct</span> {
+    SessionID <span class="typ">string</span>
+    Role      <span class="typ">string</span> <span class="cmt">// "player" | "narrator" | "referee" | "npc"</span>
+    Content   <span class="typ">string</span>
+}
+
+<span class="kw">type</span> <span class="typ">Store</span> <span class="kw">interface</span> {
+    <span class="fn">AppendEvent</span>(ctx <span class="typ">context.Context</span>, e <span class="typ">Event</span>) <span class="typ">error</span>
+    <span class="fn">RecentEvents</span>(ctx <span class="typ">context.Context</span>, sessionID <span class="typ">string</span>, limit <span class="typ">int</span>) ([]<span class="typ">Event</span>, <span class="typ">error</span>)
+}</pre>
+</div>
+
+<p>Then the real implementation in <code>pkg/store/pgx_store.go</code> — integration-tested like <code>pkg/llm</code>, skipped without <code>DATABASE_URL</code>:</p>
+
+<pre><span class="kw">type</span> <span class="typ">PGXStore</span> <span class="kw">struct</span>{ conn <span class="op">*</span><span class="typ">pgx.Conn</span> }
+
+<span class="kw">func</span> <span class="fn">New</span>(ctx <span class="typ">context.Context</span>, connStr <span class="typ">string</span>) (<span class="op">*</span><span class="typ">PGXStore</span>, <span class="typ">error</span>) {
+    conn, err <span class="op">:=</span> pgx.<span class="fn">Connect</span>(ctx, connStr)
+    <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> { <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"store.New: %w"</span>, err) }
+    <span class="kw">return</span> <span class="op">&amp;</span><span class="typ">PGXStore</span>{conn: conn}, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> (s <span class="op">*</span><span class="typ">PGXStore</span>) <span class="fn">AppendEvent</span>(ctx <span class="typ">context.Context</span>, e <span class="typ">Event</span>) <span class="typ">error</span> {
+    _, err <span class="op">:=</span> s.conn.<span class="fn">Exec</span>(ctx,
+        <span class="str">"INSERT INTO events (session_id, role, content) VALUES ($1, $2, $3)"</span>,
+        e.SessionID, e.Role, e.Content,
+    )
+    <span class="kw">return</span> err
+}
+
+<span class="kw">func</span> (s <span class="op">*</span><span class="typ">PGXStore</span>) <span class="fn">RecentEvents</span>(ctx <span class="typ">context.Context</span>, sessionID <span class="typ">string</span>, limit <span class="typ">int</span>) ([]<span class="typ">Event</span>, <span class="typ">error</span>) {
+    rows, err <span class="op">:=</span> s.conn.<span class="fn">Query</span>(ctx,
+        <span class="str">"SELECT role, content FROM events WHERE session_id = $1 ORDER BY created_at DESC LIMIT $2"</span>,
+        sessionID, limit,
+    )
+    <span class="kw">if</span> err <span class="op">!=</span> <span class="kw">nil</span> { <span class="kw">return</span> <span class="kw">nil</span>, err }
+    <span class="kw">defer</span> rows.<span class="fn">Close</span>()
+
+    <span class="kw">var</span> events []<span class="typ">Event</span>
+    <span class="kw">for</span> rows.<span class="fn">Next</span>() {
+        <span class="kw">var</span> e <span class="typ">Event</span>
+        e.SessionID <span class="op">=</span> sessionID
+        <span class="kw">if</span> err <span class="op">:=</span> rows.<span class="fn">Scan</span>(<span class="op">&amp;</span>e.Role, <span class="op">&amp;</span>e.Content); err <span class="op">!=</span> <span class="kw">nil</span> { <span class="kw">return</span> <span class="kw">nil</span>, err }
+        events <span class="op">=</span> <span class="fn">append</span>(events, e)
+    }
+    <span class="kw">return</span> events, rows.<span class="fn">Err</span>()
+}</pre>
+
+<div class="bot-note">
+  <strong>Updated request flow with memory:</strong>
+  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; margin-top: 0.5rem; line-height: 1.9">
+    player types action<br>
+    → store.AppendEvent(player message)<br>
+    → store.RecentEvents(last 20)<br>
+    → build prompt from history + new message<br>
+    → llm.Complete → narrator response<br>
+    → store.AppendEvent(narrator response)<br>
+    → send to Discord
+  </div>
+  The Narrator now has context going back across sessions.
+</div>
+
+<hr>
+
+<div class="quiz">
+  <h2>Check Your Understanding</h2>
+  <p>No scrolling.</p>
+
+  <div class="quiz-question">
+    <div class="quiz-q">1. You call <code>conn.Query(...)</code> and immediately return on an error before reaching <code>defer rows.Close()</code>. What is the consequence?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> the query is retried automatically on the next call</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> the server cursor stays open, leaking a connection</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> pgx closes the cursor when the function returns</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="d"> the rows object panics when garbage collected later</label>
+    </div>
+    <button class="check-btn" onclick="check('q1')">Check</button>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">2. Why pass <code>ctx</code> into <code>conn.Query</code> and <code>conn.Exec</code>?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> pgx requires it for connection pool routing logic</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> a cancelled context aborts the in-flight query early</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> context carries the transaction object for pgx</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="d"> it prevents two goroutines sharing the same connection</label>
+    </div>
+    <button class="check-btn" onclick="check('q2')">Check</button>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">3. <code>conn.QueryRow(...).Scan(&amp;id)</code> returns <code>pgx.ErrNoRows</code>. What does that mean?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="a"> the query syntax was invalid and postgres rejected it</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="b"> the query matched zero rows in the database table</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="c"> the scan target type mismatched the column type returned</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="d"> the database connection dropped before scan completed</label>
+    </div>
+    <button class="check-btn" onclick="check('q3')">Check</button>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-question">
+    <div class="quiz-q">4. Why is <code>rows.Err()</code> checked after the loop, instead of trusting that the loop completed normally?</div>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="a"> the loop may exit due to a mid-stream network error</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="b"> rows.Next panics silently and Err recovers the panic</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="c"> Err resets the cursor to scan the rows a second time</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="d"> rows.Next returns true one extra time after exhaustion</label>
+    </div>
+    <button class="check-btn" onclick="check('q4')">Check</button>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div id="quiz-score"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary resource &rarr;</strong> <a href="https://pkg.go.dev/github.com/jackc/pgx/v5">pgx/v5 docs</a> — read the package overview and the <code>pgxpool</code> subpackage for production use.</p>
+  <p><strong>Next &rarr;</strong> Lesson 14: System Prompts &amp; Conversation History — wire the store into the session loop so the Narrator receives the full history on each turn, and give each agent a system prompt that defines its role.</p>
+  <p><strong>Previous &rarr;</strong> <a href="0012-conditions.html">Lesson 12: Conditions &amp; iota</a></p>
+  <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
+  <p style="color: #888;">Ask your agent about <code>pgxpool</code> for concurrent connections, database migrations with <code>golang-migrate</code>, or how to write the schema migration file.</p>
+</div>
+
+<script>
+  const answers = {};
+  const correct = { q1: 'b', q2: 'b', q3: 'b', q4: 'a' };
+  const explain = {
+    q1: 'If Query returns an error, <code>rows</code> is nil or already closed — so <code>defer rows.Close()</code> never runs. The correct pattern: check the error, then immediately defer. The cursor stays open if you return before the defer is registered.',
+    q2: 'The same reason you pass ctx to <code>llm.Complete</code>: a cancelled context (session ended, user quit) aborts the in-flight database query. Without it, a slow query keeps the goroutine alive even after the caller has moved on.',
+    q3: '<code>pgx.ErrNoRows</code> is a sentinel meaning the query was valid but matched nothing. It\'s not a connection error or a type mismatch — check for it with <code>errors.Is</code> to distinguish "not found" from real failures.',
+    q4: '<code>rows.Next()</code> returns false both when all rows are exhausted and when a network error occurs mid-stream. The loop body can\'t tell the difference. <code>rows.Err()</code> is the only way to know whether the loop finished cleanly or was cut short.',
+  };
+  function check(qid) {
+    const sel = document.querySelector(`input[name="${qid}"]:checked`);
+    const fb  = document.getElementById(`${qid}-fb`);
+    if (!sel) { fb.innerHTML = '<span style="color:#888">Pick an answer first.</span>'; return; }
+    answers[qid] = sel.value === correct[qid];
+    fb.innerHTML = answers[qid]
+      ? `<span class="ok">&#10003; Correct.</span> ${explain[qid]}`
+      : `<span class="no">&#10007; Not quite.</span> ${explain[qid]}`;
+    if (Object.keys(answers).length === 4) {
+      const score = Object.values(answers).filter(Boolean).length;
+      const el = document.getElementById('quiz-score');
+      el.style.display = 'block';
+      el.textContent = `Score: ${score}/4. ${score === 4 ? 'All four. Build pkg/store, then Lesson 14.' : score >= 3 ? 'Good — check what you missed.' : 'Reread the Query and rows.Err sections.'}`;
+    }
+  }
+</script>
+</body>
+</html>
